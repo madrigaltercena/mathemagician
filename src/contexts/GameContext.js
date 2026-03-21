@@ -77,6 +77,7 @@ const ACTIONS = {
   UPDATE_INVENTORY: 'UPDATE_INVENTORY',
   UNLOCK_ACHIEVEMENT: 'UNLOCK_ACHIEVEMENT',
   SET_CHARACTER: 'SET_CHARACTER',
+  RESET_PROGRESS: 'RESET_PROGRESS',
   RESET_GAME: 'RESET_GAME',
   LOAD_SAVED_DATA: 'LOAD_SAVED_DATA',
 };
@@ -147,6 +148,13 @@ function gameReducer(state, action) {
         hasCharacter: false,
       };
 
+    case ACTIONS.RESET_PROGRESS: {
+      return {
+        ...state,
+        progress: initialState.progress,
+      };
+    }
+
     case ACTIONS.LOAD_SAVED_DATA:
       return {
         ...state,
@@ -214,6 +222,7 @@ export function GameProvider({ children }) {
     unlockAchievement: (achievement) => dispatch({ type: ACTIONS.UNLOCK_ACHIEVEMENT, payload: achievement }),
     setCharacter: (data) => dispatch({ type: ACTIONS.SET_CHARACTER, payload: data }),
     resetGame: () => dispatch({ type: ACTIONS.RESET_GAME }),
+    resetProgress: () => dispatch({ type: ACTIONS.RESET_PROGRESS }),
     
     // Update streak
     updateStreak: () => {
