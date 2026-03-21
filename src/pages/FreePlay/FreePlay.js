@@ -16,19 +16,9 @@ import styles from './FreePlay.module.css';
 
 const OPERATIONS = [
   { id: 'addition', label: 'Adição', icon: Plus, color: 'var(--color-kingdom-add)', unlockCondition: () => true },
-  { id: 'subtraction', label: 'Subtração', icon: Minus, color: 'var(--color-kingdom-sub)', unlockCondition: (progress) => {
-    const additionCompleted = progress.story.completedLevels['addition']?.length || 0;
-    return additionCompleted > 0;
-  }},
-  { id: 'multiplication', label: 'Multiplicação', icon: X, color: 'var(--color-kingdom-mul)', unlockCondition: (progress) => {
-    const additionCompleted = progress.story.completedLevels['addition']?.length || 0;
-    return additionCompleted >= 12;
-  }},
-  { id: 'division', label: 'Divisão', icon: Divide, color: 'var(--color-kingdom-div)', unlockCondition: (progress) => {
-    const additionCompleted = progress.story.completedLevels['addition']?.length || 0;
-    const multiplicationCompleted = progress.story.completedLevels['multiplication']?.length || 0;
-    return additionCompleted >= 18 && multiplicationCompleted >= 5;
-  }},
+  { id: 'subtraction', label: 'Subtração', icon: Minus, color: 'var(--color-kingdom-sub)', unlockCondition: () => true },
+  { id: 'multiplication', label: 'Multiplicação', icon: X, color: 'var(--color-kingdom-mul)', unlockCondition: () => true },
+  { id: 'division', label: 'Divisão', icon: Divide, color: 'var(--color-kingdom-div)', unlockCondition: () => true },
 ];
 
 const DIFFICULTIES = [
@@ -39,25 +29,16 @@ const DIFFICULTIES = [
 
 export default function FreePlay() {
   const navigate = useNavigate();
-  const { state } = useGame();
+  useGame();
   const [selectedOperation, setSelectedOperation] = useState('addition');
   const [selectedDifficulty, setSelectedDifficulty] = useState('easy');
-  const { progress } = state;
 
   const isOperationUnlocked = (op) => {
-    return op.unlockCondition(progress);
-  };
-
-  const getUnlockText = (op) => {
-    if (op.id === 'addition') return 'pronto';
-    if (op.id === 'subtraction') return 'lvl 1';
-    if (op.id === 'multiplication') return 'lvl 12';
-    if (op.id === 'division') return 'lvl 18+25';
-    return '';
+    return op.unlockCondition();
   };
 
   const handleStartChallenge = () => {
-    navigate(`/challenge/${selectedOperation}?difficulty=${selectedDifficulty}&mode=freeplay`);
+    navigate(`/challenge?mode=freeplay&operation=${selectedOperation}`);
   };
 
   const handleBack = () => {
@@ -96,7 +77,7 @@ export default function FreePlay() {
                 <Icon size={40} weight="fill" className={styles.operationIcon} />
                 <span className={styles.operationLabel}>{op.label}</span>
                 <span className={styles.operationStatus}>
-                  {unlocked ? '✅' : `🔒 ${getUnlockText(op)}`}
+                  {unlocked ? '✅' : '🔒'}
                 </span>
               </motion.button>
             );

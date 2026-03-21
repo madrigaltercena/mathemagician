@@ -100,9 +100,10 @@ function makeExpr(lvl) {
 
 // ─── Main generator ──────────────────────────────────────────
 
-export function generateQuestions(kingdom, level, count = 5) {
+export function generateQuestions(kingdom, level, count = 5, operationOverride = null) {
   const cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG[1];
-  const ops = cfg.ops || ['addition'];
+  // Use override operation if provided (freeplay mode), otherwise fall back to level config
+  const ops = operationOverride ? [operationOverride] : (cfg.ops || ['addition']);
   const questions = [];
   for (let i = 0; i < count; i++) {
     const op = ops[rand(0, ops.length - 1)];

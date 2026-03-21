@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useGame } from '../../contexts/GameContext';
 import NumberPad from '../../components/NumberPad/NumberPad';
 import XPBar from '../../components/XPBar/XPBar';
@@ -43,13 +43,30 @@ export default function Challenge({ onBack, onComplete }) {
   const navigate = useNavigate();
   const { state, actions } = useGame();
   const { settings, player } = state;
-  
-  // Use currentKingdom from state (not URL prop) for question generation
-  const currentKingdom = state.progress.story.currentKingdom;
-  const currentLevel = state.progress.story.currentLevel;
-  
-  const [questions, setQuestions] = useState(() => 
-    generateQuestions(currentKingdom || 'kingdom1', currentLevel, 5)
+
+  // Read URL params
+  const { operation: urlOp } = useParams(); // path param: kingdom id (story) or operation (freeplay)
+  const [searchParams] = useSearchParams();
+  const urlMode = searchParams.get('mode'); // 'story' or 'freeplay'
+  const urlOperation = searchParams.get('operation'); // operation override (freeplay)
+  const urlKingdom = searchParams.get('kingdom'); // kingdom id (story mode via query string)
+
+  const isFreePlay = urlMode === 'freeplay';
+
+  // Determine kingdom and operation based on mode
+  // In freeplay: use URL operation, don't touch story state
+  // In story: use URL kingdom or path param, fall back to story state
+  const storyKingdom = state.progress.story.currentKingdom || 'kingdom1';
+  const storyLevel = state.progress.story.currentLevel;
+  const currentKingdom = isFreePlay
+    ? (urlKingdom || urlOp || 'kingdom1')
+    : (urlKingdom || urlOp || storyKingdom);
+  const currentLevel = storyLevel;
+  // In freeplay, force a single operation; in story, use level config (null)
+  const currentOperation = isFreePlay ? (urlOperation || urlOp || 'addition') : null;
+
+  const [questions, setQuestions] = useState(() =>
+    generateQuestions(currentKingdom, currentLevel, 5, currentOperation)
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -62,11 +79,11 @@ export default function Challenge({ onBack, onComplete }) {
   const [showAgeCompletion, setShowAgeCompletion] = useState(false);
   const [answerState, setAnswerState] = useState(null); // 'correct', 'wrong', null
   const [shake, setShake] = useState(false);
-  const [hintsUsedPerQuestion, setHintsUsedPerQuestion] = useState({}); // Track hint usage per question index
-  
-  // Regenerate questions when level changes (level up, navigate back from menu)
+  const [hintsUsedPerQuestion, setHintsUsedPerQuestion] = useState({});
+
+  // Regenerate questions when kingdom or level changes
   useEffect(() => {
-    setQuestions(generateQuestions(currentKingdom || 'kingdom1', currentLevel, 5));
+    setQuestions(generateQuestions(currentKingdom, currentLevel, 5, currentOperation));
     setCurrentIndex(0);
     setUserAnswer('');
     setHintsRemaining(3);
@@ -75,11 +92,11 @@ export default function Challenge({ onBack, onComplete }) {
     setShowResult(false);
     setAnswerState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLevel]);
-  
+  }, [currentKingdom, currentLevel]);
+
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
-  
+
   const handleKeyPress = (key) => {
     if (key === 'delete') {
       setUserAnswer(prev => prev.slice(0, -1));
@@ -89,12 +106,12 @@ export default function Challenge({ onBack, onComplete }) {
       setUserAnswer(prev => prev + key);
     }
   };
-  
+
   const checkAnswer = () => {
     if (!userAnswer) return;
-    
+
     const correct = parseInt(userAnswer, 10) === currentQuestion.answer;
-    
+
     if (correct) {
       setAnswerState('correct');
       setCorrectCount(prev => prev + 1);
@@ -112,7 +129,7 @@ export default function Challenge({ onBack, onComplete }) {
       }, 1500);
     }
   };
-  
+
   const nextQuestion = () => {
     if (isLastQuestion) {
       finishChallenge();
@@ -122,40 +139,46 @@ export default function Challenge({ onBack, onComplete }) {
       setHintStep(0);
     }
   };
-  
+
   const finishChallenge = () => {
     const stars = calculateStars(correctCount, questions.length);
     const totalHintsUsed = Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0);
     const xpEarned = (stars * 10) - (totalHintsUsed * 3);
-    
     const completedLevel = state.progress.story.currentLevel;
-    actions.completeLevel(currentKingdom, completedLevel, stars, Math.max(0, xpEarned), totalHintsUsed);
-    
-    // Show milestone modal at half-year (2,4,6,8,10,12,14) and full-year (4,8,12,16) — we show at all half-year levels
+
+    // Only update story progress in story mode, not freeplay
+    if (!isFreePlay) {
+      actions.completeLevel(currentKingdom, completedLevel, stars, Math.max(0, xpEarned), totalHintsUsed);
+    } else {
+      // In freeplay: just add XP and update streak, don't advance story
+      actions.addXP(Math.max(0, xpEarned));
+      actions.updateStreak();
+    }
+
+    // Show milestone modal at half-year levels (story mode only)
     const HALF_YEAR_LEVELS = [2, 4, 6, 8, 10, 12, 14, 16];
-    if (HALF_YEAR_LEVELS.includes(completedLevel)) {
+    if (!isFreePlay && HALF_YEAR_LEVELS.includes(completedLevel)) {
       setShowAgeCompletion(true);
       setShowResult(false);
     } else {
       setShowResult(true);
     }
   };
-  
+
   const handleUseHint = () => {
     if (hintsRemaining <= 0) return;
-    
+
     const hint = generateHint(currentQuestion);
     setCurrentHint(hint);
     setHintStep(0);
     setHintsRemaining(prev => prev - 1);
-    // Track hint usage for this specific question
     setHintsUsedPerQuestion(prev => ({
       ...prev,
       [currentIndex]: (prev[currentIndex] || 0) + 1
     }));
     setShowHint(true);
   };
-  
+
   const handleHintStep = () => {
     if (hintStep < currentHint.length - 1) {
       setHintStep(prev => prev + 1);
@@ -164,12 +187,12 @@ export default function Challenge({ onBack, onComplete }) {
       setHintStep(0);
     }
   };
-  
+
   const handleCloseHint = () => {
     setShowHint(false);
     setHintStep(0);
   };
-  
+
   const handleResultClose = () => {
     if (onComplete) {
       onComplete();
@@ -177,28 +200,26 @@ export default function Challenge({ onBack, onComplete }) {
       onBack();
     }
   };
-  
+
   const handleAgeContinue = () => {
     setShowAgeCompletion(false);
     setShowResult(false);
-    // Navigate to story mode - user will continue from current level
     if (onComplete) {
       onComplete();
     } else if (onBack) {
       onBack();
     }
   };
-  
+
   const handleAgeRestart = () => {
     setShowAgeCompletion(false);
     setShowResult(false);
-    // Reset progress to level 1
     actions.resetProgress();
     if (onBack) {
       onBack();
     }
   };
-  
+
   const handleRetry = () => {
     // Decrement currentLevel before retry so user replays the same level
     const currentProgress = { ...state.progress };
@@ -206,8 +227,14 @@ export default function Challenge({ onBack, onComplete }) {
       currentProgress.story.currentLevel -= 1;
       actions.updateProgress(currentProgress);
     }
-    
-    setQuestions(generateQuestions(currentKingdom || 'kingdom1', state.progress.story.currentLevel, 5));
+    // Questions will be regenerated via useEffect when state changes
+  };
+
+  const handleNext = () => {
+    // Read fresh from state to get the kingdom/level that was just set by completeLevel
+    const nextKingdom = state.progress.story.currentKingdom;
+    const nextLevel = state.progress.story.currentLevel;
+    setQuestions(generateQuestions(nextKingdom, nextLevel, 5, currentOperation));
     setCurrentIndex(0);
     setUserAnswer('');
     setHintsRemaining(3);
@@ -217,34 +244,22 @@ export default function Challenge({ onBack, onComplete }) {
     setAnswerState(null);
   };
 
-  const handleNext = () => {
-    // Get the current kingdom from state (updated by completeLevel)
-    const currentKingdom = state.progress.story.currentKingdom;
-    
-    // Generate new questions for next level using correct operation and level
-    setQuestions(generateQuestions(currentKingdom || 'kingdom1', state.progress.story.currentLevel, 5));
-    setCurrentIndex(0);
-    setUserAnswer('');
-    setHintsRemaining(3);
-    setHintsUsedPerQuestion({});
-    setCorrectCount(0);
-    setShowResult(false);
-    setAnswerState(null);
-  };
+  // Kingdom name for display — computed fresh on each render from state
+  const kingdomName = KINGDOM_NAMES[state.progress.story.currentKingdom] || 'Reino dos Números Pequenos';
 
   return (
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button className={styles.backButton} onClick={() => navigate(isFreePlay ? '/freeplay' : '/story')}>
           <ArrowLeft size={24} weight="bold" />
         </button>
-        
+
         <div className={styles.headerStats}>
           <XPBar compact />
           <div className={styles.headerIcons}>
-            <HintButton 
-              remaining={hintsRemaining} 
+            <HintButton
+              remaining={hintsRemaining}
               onClick={handleUseHint}
               compact
             />
@@ -258,14 +273,17 @@ export default function Challenge({ onBack, onComplete }) {
           </div>
         </div>
       </header>
-      
-      {/* Level Info - use currentKingdom from state for correct kingdom name */}
+
+      {/* Level / Operation Info */}
       <div className={styles.levelInfo}>
         <span className={styles.levelLabel}>
-          ✨ Nível {state.progress.story.currentLevel} — {KINGDOM_NAMES[state.progress.story.currentKingdom]}
+          {isFreePlay
+            ? `🎯 Modo Livre — ${currentOperation === 'multiplication' ? 'Multiplicação' : currentOperation === 'division' ? 'Divisão' : currentOperation === 'subtraction' ? 'Subtração' : 'Adição'}`
+            : `✨ Nível ${state.progress.story.currentLevel} — ${kingdomName}`
+          }
         </span>
       </div>
-      
+
       {/* Question Card */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -277,36 +295,39 @@ export default function Challenge({ onBack, onComplete }) {
           transition={{ duration: 0.3 }}
         >
           <div className={styles.questionType}>
-            {OPERATION_LABELS[state.progress.story.currentKingdom]}
+            {isFreePlay
+              ? (currentOperation === 'multiplication' ? 'Multiplicação' : currentOperation === 'division' ? 'Divisão' : currentOperation === 'subtraction' ? 'Subtração' : 'Adição')
+              : OPERATION_LABELS[state.progress.story.currentKingdom]
+            }
           </div>
-          
+
           <div className={styles.questionText}>
             {currentQuestion?.question}
           </div>
-          
+
           <div className={`${styles.answerDisplay} ${userAnswer ? styles.hasAnswer : ''}`}>
             {userAnswer || '?'}
           </div>
         </motion.div>
       </AnimatePresence>
-      
+
       {/* Progress */}
-      <ProgressDots 
-        current={currentIndex} 
-        total={questions.length} 
+      <ProgressDots
+        current={currentIndex}
+        total={questions.length}
         correct={correctCount}
       />
-      
+
       {/* Number Pad */}
       <NumberPad
         onKeyPress={handleKeyPress}
         disabled={answerState === 'correct'}
       />
-      
+
       {/* Feedback Messages */}
       <AnimatePresence>
         {answerState === 'correct' && (
-          <motion.div 
+          <motion.div
             className={styles.feedbackCorrect}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -316,7 +337,7 @@ export default function Challenge({ onBack, onComplete }) {
           </motion.div>
         )}
         {answerState === 'wrong' && (
-          <motion.div 
+          <motion.div
             className={styles.feedbackWrong}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -326,7 +347,7 @@ export default function Challenge({ onBack, onComplete }) {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Hint Modal */}
       <HintModal
         isOpen={showHint}
@@ -336,7 +357,7 @@ export default function Challenge({ onBack, onComplete }) {
         onNext={handleHintStep}
         onClose={handleCloseHint}
       />
-      
+
       {/* Result Modal */}
       <ResultModal
         isOpen={showResult && !showAgeCompletion}
@@ -346,19 +367,21 @@ export default function Challenge({ onBack, onComplete }) {
         hintsUsed={Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0)}
         streak={player.currentStreak}
         onClose={handleResultClose}
-        onNext={handleNext}
+        onNext={!isFreePlay ? handleNext : undefined}
         onRetry={handleRetry}
         onHome={onBack}
       />
 
       {/* Age Completion Modal */}
-      <AgeCompletionModal
-        isOpen={showAgeCompletion}
-        level={state.progress.story.currentLevel}
-        onContinue={handleAgeContinue}
-        onRestart={handleAgeRestart}
-        onHome={onBack}
-      />
+      {!isFreePlay && (
+        <AgeCompletionModal
+          isOpen={showAgeCompletion}
+          level={state.progress.story.currentLevel}
+          onContinue={handleAgeContinue}
+          onRestart={handleAgeRestart}
+          onHome={onBack}
+        />
+      )}
     </div>
   );
 }

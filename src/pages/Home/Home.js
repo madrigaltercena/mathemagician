@@ -144,7 +144,6 @@ export default function Home() {
                     <span className={styles.progressText}>{completed}/{total}</span>
                   </div>
                 </div>
-                {!isUnlocked && <div className={styles.lockOverlay}>🔒</div>}
                 {isCompleted && <div className={styles.completedBadge}>✨</div>}
               </motion.div>
             );

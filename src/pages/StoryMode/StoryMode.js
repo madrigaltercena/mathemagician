@@ -35,12 +35,12 @@ export default function StoryMode() {
 
   const handleKingdomSelect = (kingdom) => {
     if (!isKingdomUnlocked(kingdom)) return;
-    navigate(`/challenge/${kingdom.id}?mode=story`);
+    navigate(`/challenge?mode=story&kingdom=${kingdom.id}`);
   };
 
   const handleContinue = () => {
     const currentKingdomId = progress.story.currentKingdom || 'kingdom1';
-    navigate(`/challenge/${currentKingdomId}?mode=story`);
+    navigate(`/challenge?mode=story&kingdom=${currentKingdomId}`);
   };
 
   // Current kingdom for display
@@ -53,7 +53,7 @@ export default function StoryMode() {
         <button className={styles.backButton} onClick={() => navigate('/')}>
           <ArrowLeft size={24} weight="bold" />
         </button>
-        <h1 className={styles.title}>Zooterprise</h1>
+        <h1 className={styles.title}>Matemágica</h1>
         <XPBar compact />
       </header>
 
