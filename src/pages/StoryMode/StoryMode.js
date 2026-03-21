@@ -18,6 +18,7 @@ const KINGDOMS = [
     operation: 'Adição',
     color: 'var(--color-kingdom-add)',
     unlockLevel: 0,
+    totalLevels: 4, // levels 1-4
   },
   { 
     id: 'subtraction', 
@@ -26,6 +27,7 @@ const KINGDOMS = [
     operation: 'Subtração',
     color: 'var(--color-kingdom-sub)',
     unlockLevel: 5,
+    totalLevels: 5, // levels 5-9
   },
   { 
     id: 'multiplication', 
@@ -34,6 +36,7 @@ const KINGDOMS = [
     operation: 'Multiplicação',
     color: 'var(--color-kingdom-mul)',
     unlockLevel: 10,
+    totalLevels: 5, // levels 10-14
   },
   { 
     id: 'division', 
@@ -42,6 +45,7 @@ const KINGDOMS = [
     operation: 'Divisão',
     color: 'var(--color-kingdom-div)',
     unlockLevel: 15,
+    totalLevels: 6, // levels 15-20
   },
 ];
 
@@ -109,7 +113,7 @@ export default function StoryMode() {
           {KINGDOMS.map((kingdom, index) => {
             const completed = getKingdomProgress(kingdom.id);
             const unlocked = isKingdomUnlocked(kingdom);
-            const isCompleted = completed >= 25;
+            const isCompleted = completed >= kingdom.totalLevels;
             
             return (
               <motion.div
@@ -138,7 +142,7 @@ export default function StoryMode() {
         {(() => {
           const currentKingdomData = KINGDOMS.find(k => k.id === progress.story.currentKingdom) || KINGDOMS[0];
           const completed = getKingdomProgress(currentKingdomData.id);
-          const percentage = Math.round((completed / 25) * 100);
+          const percentage = Math.round((completed / currentKingdomData.totalLevels) * 100);
           
           return (
             <div key={currentKingdomData.id} className={styles.kingdomInfo}>
@@ -157,11 +161,11 @@ export default function StoryMode() {
                     style={{ width: `${percentage}%`, background: currentKingdomData.color }}
                   />
                 </div>
-                <span className={styles.progressLabel}>Progresso: {percentage}%</span>
+                <span className={styles.progressLabel}>{completed}/{currentKingdomData.totalLevels} ({percentage}%)</span>
               </div>
               
               <p className={styles.levelInfo}>
-                Nível atual: {progress.story.currentLevel} / 25
+                Nível {progress.story.currentLevel} — {currentKingdomData.name}
               </p>
             </div>
           );

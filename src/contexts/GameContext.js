@@ -258,7 +258,7 @@ export function GameProvider({ children }) {
       
       // Update current level if next
       if (level >= storyProgress.currentLevel) {
-        storyProgress.currentLevel = Math.min(level + 1, 25);
+        storyProgress.currentLevel = Math.min(level + 1, 20);
       }
       
       // Advance kingdom based on level thresholds
