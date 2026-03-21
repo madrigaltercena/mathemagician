@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGame } from '../../contexts/GameContext';
 import NumberPad from '../../components/NumberPad/NumberPad';
 import XPBar from '../../components/XPBar/XPBar';
@@ -30,6 +31,7 @@ const KINGDOM_NAMES = {
 };
 
 export default function Challenge({ operation = 'addition', difficulty = 'easy', mode = 'story', onBack, onComplete }) {
+  const navigate = useNavigate();
   const { state, actions } = useGame();
   const { settings, player } = state;
   
@@ -150,6 +152,25 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
   };
   
   const handleRetry = () => {
+    // Decrement currentLevel before retry so user replays the same level
+    const currentProgress = { ...state.progress };
+    if (currentProgress.story.currentLevel > 1) {
+      currentProgress.story.currentLevel -= 1;
+      actions.updateProgress(currentProgress);
+    }
+    
+    setQuestions(generateQuestions(operation, difficulty, 5));
+    setCurrentIndex(0);
+    setUserAnswer('');
+    setHintsRemaining(3);
+    setHintsUsedPerQuestion({});
+    setCorrectCount(0);
+    setShowResult(false);
+    setAnswerState(null);
+  };
+
+  const handleNext = () => {
+    // Generate new questions for next level
     setQuestions(generateQuestions(operation, difficulty, 5));
     setCurrentIndex(0);
     setUserAnswer('');
@@ -164,7 +185,7 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={onBack}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
           <ArrowLeft size={24} weight="bold" />
         </button>
         
@@ -274,6 +295,7 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
         hintsUsed={Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0)}
         streak={player.currentStreak}
         onClose={handleResultClose}
+        onNext={handleNext}
         onRetry={handleRetry}
         onHome={onBack}
       />

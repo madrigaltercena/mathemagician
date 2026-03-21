@@ -11,6 +11,7 @@ export default function ResultModal({
   hintsUsed = 0, 
   streak = 0,
   onClose,
+  onNext,
   onRetry,
   onHome 
 }) {
@@ -94,7 +95,7 @@ export default function ResultModal({
               
               <motion.button 
                 className={styles.nextButton}
-                onClick={onClose}
+                onClick={onNext}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
