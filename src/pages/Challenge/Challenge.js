@@ -212,10 +212,10 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
         </div>
       </header>
       
-      {/* Level Info */}
+      {/* Level Info - use currentKingdom from state for correct kingdom name */}
       <div className={styles.levelInfo}>
         <span className={styles.levelLabel}>
-          ✨ Nível {state.progress.story.currentLevel} — {KINGDOM_NAMES[operation]}
+          ✨ Nível {state.progress.story.currentLevel} — {KINGDOM_NAMES[state.progress.story.currentKingdom]}
         </span>
       </div>
       
@@ -230,7 +230,7 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
           transition={{ duration: 0.3 }}
         >
           <div className={styles.questionType}>
-            {OPERATION_LABELS[operation]}
+            {OPERATION_LABELS[state.progress.story.currentKingdom]}
           </div>
           
           <div className={styles.questionText}>

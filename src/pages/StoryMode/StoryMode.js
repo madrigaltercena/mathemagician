@@ -25,7 +25,7 @@ const KINGDOMS = [
     icon: '🔵',
     operation: 'Subtração',
     color: 'var(--color-kingdom-sub)',
-    unlockLevel: 12,
+    unlockLevel: 5,
   },
   { 
     id: 'multiplication', 
@@ -33,7 +33,7 @@ const KINGDOMS = [
     icon: '🔴',
     operation: 'Multiplicação',
     color: 'var(--color-kingdom-mul)',
-    unlockLevel: 18,
+    unlockLevel: 10,
   },
   { 
     id: 'division', 
@@ -41,7 +41,7 @@ const KINGDOMS = [
     icon: '🟢',
     operation: 'Divisão',
     color: 'var(--color-kingdom-div)',
-    unlockLevel: 25,
+    unlockLevel: 15,
   },
 ];
 

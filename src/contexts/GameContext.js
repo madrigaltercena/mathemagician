@@ -261,10 +261,10 @@ export function GameProvider({ children }) {
         storyProgress.currentLevel = Math.min(level + 1, 25);
       }
       
-      // Advance kingdom based on level thresholds (spec-defined)
-      // Levels 1-11: addition, 12-17: subtraction, 18-24: multiplication, 25: division
+      // Advance kingdom based on level thresholds
+      // Levels 1-4: addition, 5-9: subtraction, 10-14: multiplication, 15+: division
       const KINGDOM_ORDER = ['addition', 'subtraction', 'multiplication', 'division'];
-      const KINGDOM_THRESHOLDS = [1, 12, 18, 25];
+      const KINGDOM_THRESHOLDS = [1, 5, 10, 15];
       
       let nextKingdom = kingdom;
       for (let i = KINGDOM_ORDER.length - 1; i >= 0; i--) {
