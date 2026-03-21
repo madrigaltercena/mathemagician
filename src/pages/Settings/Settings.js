@@ -6,9 +6,6 @@ import XPBar from '../../components/XPBar/XPBar';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
-  SpeakerHigh,
-  SpeakerSlash,
-  Timer,
   ArrowClockwise,
 } from '@phosphor-icons/react';
 import styles from './Settings.module.css';

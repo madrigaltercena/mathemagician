@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../../contexts/GameContext';
 import XPBar from '../../components/XPBar/XPBar';
@@ -6,7 +6,6 @@ import BottomNav from '../../components/BottomNav/BottomNav';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
-  Sword,
   Lightning,
 } from '@phosphor-icons/react';
 import styles from './StoryMode.module.css';
@@ -109,7 +108,6 @@ export default function StoryMode() {
             const completed = getKingdomProgress(kingdom.id);
             const unlocked = isKingdomUnlocked(kingdom);
             const isCompleted = completed >= 25;
-            const percentage = Math.round((completed / 25) * 100);
             
             return (
               <motion.div

@@ -1,6 +1,6 @@
-# DEPENDENCIES.md — Madrigal
+# DEPENDENCIES.md — Mathemagician
 
-Log de todas as dependências npm instaladas para o projeto Madrigal.
+Log de todas as dependências npm instaladas para o projeto Mathemagician.
 
 ---
 

@@ -9,10 +9,8 @@ import ResultModal from '../../components/ResultModal/ResultModal';
 import { generateQuestions, generateHint, calculateXP, calculateStars } from '../../utils/questions';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Lightning,
   SpeakerHigh,
   SpeakerSlash,
-  Timer,
   ArrowLeft,
 } from '@phosphor-icons/react';
 import styles from './Challenge.module.css';

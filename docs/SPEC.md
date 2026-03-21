@@ -1,25 +1,25 @@
-# SPEC.md — Madrigal (Matemágica)
+# SPEC.md — Mathemagician (Matemágica)
 
-**Project Name:** Madrigal  
-**App Name:** Matemágica — O Reino dos Números  
-**Type:** Educational Gamification Web App (PWA)  
-**Target:** Children aged 6–10 (Portugal/Brazil)  
-**Date:** 2026-03-21  
+**Project Name:** Mathemagician
+**App Name:** Matemágica — O Reino dos Números
+**Type:** Educational Gamification Web App (PWA)
+**Target:** Children aged 6-10 (Portugal/Brazil)
+**Date:** 2026-03-21
 
 ---
 
 ## 1. Concept & Vision
 
-**Matemágica** is a magical learning world where children aged 6–10 embark on a journey as young apprentice mages, mastering mathematical operations through engaging gameplay. The app combines **story mode** (progressive unlock across 4 magical kingdoms) with **free play mode** (practice any operation at chosen difficulty). The emotional hook: the child's character visually evolves as they progress, creating genuine attachment to their mage avatar.
+**Matemágica** is a magical learning world where children aged 6-10 embark on a journey as young apprentice mages, mastering mathematical operations through engaging gameplay. The app combines **story mode** (progressive unlock across 4 magical kingdoms) with **free play mode** (practice any operation at chosen difficulty). The emotional hook: the child's character visually evolves as they progress, creating genuine attachment to their mage avatar.
 
-**Core feeling:** Empowering, magical, rewarding — every correct answer feels like casting a spell.
+**Core feeling:** Empowering, magical, rewarding - every correct answer feels like casting a spell.
 
 ---
 
 ## 2. Design Language
 
 ### Aesthetic Direction
-Fantasy/ magical academy — inspired by Hogwarts meets Pokémon. Warm, inviting, slightly whimsical but not cartoonish. The world should feel like a place children want to return to.
+Fantasy/ magical academy - inspired by Hogwarts meets Pokémon. Warm, inviting, slightly whimsical but not cartoonish. The world should feel like a place children want to return to.
 
 ### Color Palette
 | Role | Color | Hex |
@@ -30,10 +30,10 @@ Fantasy/ magical academy — inspired by Hogwarts meets Pokémon. Warm, inviting
 | Background | Soft Cream | `#FEF9EF` |
 | Dark Text | Deep Navy | `#1E1B4B` |
 | Error/Wrong | Rose | `#F43F5E` |
-| Kingdom — Addition | Gold | `#FBBF24` |
-| Kingdom — Subtraction | Blue | `#3B82F6` |
-| Kingdom — Multiplication | Red | `#EF4444` |
-| Kingdom — Division | Green | `#22C55E` |
+| Kingdom - Addition | Gold | `#FBBF24` |
+| Kingdom - Subtraction | Blue | `#3B82F6` |
+| Kingdom - Multiplication | Red | `#EF4444` |
+| Kingdom - Division | Green | `#22C55E` |
 
 ### Typography
 - **Headings:** `Fredoka One` (playful, rounded, highly legible for children)
@@ -46,7 +46,7 @@ Fantasy/ magical academy — inspired by Hogwarts meets Pokémon. Warm, inviting
 - Card padding: 24px
 - Section gaps: 32px
 - Border radius: 16px (cards), 50% (avatars, badges)
-- Shadows: soft, layered — `0 4px 20px rgba(0,0,0,0.08)`
+- Shadows: soft, layered - `0 4px 20px rgba(0,0,0,0.08)`
 
 ### Motion Philosophy
 - **Correct answer:** Green burst + stars particle effect + gentle bounce
@@ -55,12 +55,12 @@ Fantasy/ magical academy — inspired by Hogwarts meets Pokémon. Warm, inviting
 - **Level up:** Full-screen celebration with confetti
 - **Transitions:** 300ms ease-out between screens
 - **Hint reveal:** Fade-in with gentle pulse animation
-- **No jarring or sudden animations** — everything smooth and child-friendly
+- **No jarring or sudden animations** - everything smooth and child-friendly
 
 ### Visual Assets
 - **Icons:** Phosphor Icons (duotone style)
 - **Illustrations:** Custom SVG characters and kingdoms (simple flat design)
-- **No stock photos** — all visuals are cohesive and on-brand
+- **No stock photos** - all visuals are cohesive and on-brand
 
 ---
 
@@ -73,7 +73,7 @@ Splash Screen (2s logo animation)
 [First-time only] Character Creation
     - Name input
     - Avatar picker (6 presets)
-    - Age selector (6–10)
+    - Age selector (6-10)
     ↓
 Home Screen (primary hub)
     ↓
@@ -102,7 +102,7 @@ Home Screen (primary hub)
 
 ### 4.1 Character Creation (First Launch)
 - **Name:** Text input, max 12 characters, no numbers/symbols
-- **Avatar:** 6 preset mage characters (3 boys, 3 girls) — full body, not just faces
+- **Avatar:** 6 preset mage characters (3 boys, 3 girls) - full body, not just faces
 - **Age:** Slider or tap selector (6, 7, 8, 9, 10)
 - **Skip available** (can fill later in settings)
 - On completion: celebratory animation → Home screen
@@ -120,15 +120,15 @@ Home Screen (primary hub)
 
 | Kingdom | Operation | Theme | Numbers Range |
 |---|---|---|---|
-| 🟡 Golden Fields | Addition | Sun Mage | 1–20 (age 6), up to 100 |
-| 🔵 Crystal Caves | Subtraction | Moon Mage | 1–20 (age 6), up to 100 |
+| 🟡 Golden Fields | Addition | Sun Mage | 1-20 (age 6), up to 100 |
+| 🔵 Crystal Caves | Subtraction | Moon Mage | 1-20 (age 6), up to 100 |
 | 🔴 Fire Forest | Multiplication | Fire Mage | ×2,×3,×4,×5 (age 7), full table |
 | 🟢 Emerald Mountains | Division | Forest Mage | ÷2,÷3,÷4,÷5 (age 7), full table |
 
 **Level progression:**
-- Levels 1–5: Easy (single digit, numbers ≤10)
-- Levels 6–15: Medium (double digits, numbers ≤50)
-- Levels 16–25: Hard (triple digits, numbers ≤100/1000)
+- Levels 1-5: Easy (single digit, numbers ≤10)
+- Levels 6-15: Medium (double digits, numbers ≤50)
+- Levels 16-25: Hard (triple digits, numbers ≤100/1000)
 - Each level: 5 questions, 3 stars achievable
 - Must score ≥60% (3/5) to unlock next level
 - Must complete all levels of Kingdom N to unlock Kingdom N+1
@@ -136,7 +136,7 @@ Home Screen (primary hub)
 ### 4.4 Free Play Mode
 - Choose operation: ➕ ➖ ✕ ➗
 - Choose difficulty: Easy / Medium / Hard / Challenge
-- No progression — pure practice
+- No progression - pure practice
 - XP capped at 50% of Story Mode rewards
 - Results screen with breakdown
 
@@ -178,7 +178,7 @@ Home Screen (primary hub)
   2. Visual aid: Animated number line or number blocks
   3. Near-answer: *"Está entre 10 e 15..."*
 - Using hint: XP reward reduced by 50%
-- Hints are **encouraged, never punished** — no negative feedback
+- Hints are **encouraged, never punished** - no negative feedback
 
 ### 4.7 XP & Progression System
 **XP per correct answer:**
@@ -251,7 +251,7 @@ Home Screen (primary hub)
 - Contains: Question text, visual aids (optional), input area
 
 ### 5.4 NumberPad
-- 0–9 digits, large touch targets (min 64x64px)
+- 0-9 digits, large touch targets (min 64x64px)
 - Delete (backspace), Submit (checkmark)
 - States: Default, pressed (scale 0.95), disabled
 
@@ -364,11 +364,11 @@ interface GameState {
 ```
 
 ### LocalStorage Keys
-- `madrigal_player` — Player profile
-- `madrigal_progress` — All progress data
-- `madrigal_inventory` — Unlocked items
-- `madrigal_achievements` — Achievement state
-- `madrigal_settings` — App settings
+- `madrigal_player` - Player profile
+- `madrigal_progress` - All progress data
+- `madrigal_inventory` - Unlocked items
+- `madrigal_achievements` - Achievement state
+- `madrigal_settings` - App settings
 
 ### Question Generation
 - Pre-generated question banks per operation/difficulty (no AI needed)
@@ -431,7 +431,7 @@ madrigal/
 ## 7. Out of Scope (v1)
 
 - Multiplayer / social features
-- Cloud save (Firebase) — LocalStorage only for v1
+- Cloud save (Firebase) - LocalStorage only for v1
 - Parent dashboard
 - In-app purchases
 - Leaderboards

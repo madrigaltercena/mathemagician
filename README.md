@@ -1,4 +1,4 @@
-# Madrigal — Matemágica
+# Mathemagician — Matemágica
 
 ## Documentação de Design
 Toda a documentação de design (SPEC.md, WIREFRAMES.md) está disponível em:

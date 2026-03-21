@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useGame } from '../../contexts/GameContext';
 import { useNavigate } from 'react-router-dom';
 import MageAvatar from '../../components/MageAvatar/MageAvatar';
@@ -8,9 +8,7 @@ import { motion } from 'framer-motion';
 import {
   Sword,
   Target,
-  Trophy,
   Gear,
-  Fire,
 } from '@phosphor-icons/react';
 import styles from './Home.module.css';
 

@@ -12,19 +12,8 @@ const AVATAR_EMOJIS = {
   default: '🧙‍♂️',
 };
 
-const MAGE_TITLES = {
-  1: 'Aprendiz',
-  2: 'Aprendiz II',
-  3: 'Mago Júnior',
-  4: 'Mago',
-  5: 'Mago Sênior',
-  6: 'Grão-Mago',
-  7: 'Mago Supremo',
-};
-
 export default function MageAvatar({ avatar = 'default', level = 1, size = 'medium', showLevel = false, celebrating = false }) {
   const emoji = AVATAR_EMOJIS[avatar] || AVATAR_EMOJIS.default;
-  const title = MAGE_TITLES[level] || 'Aprendiz';
 
   const sizeClasses = {
     small: styles.small,
