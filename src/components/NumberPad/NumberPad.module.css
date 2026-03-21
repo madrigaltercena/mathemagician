@@ -1,0 +1,81 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.row {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+.key {
+  width: 80px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: var(--size-xl);
+  font-weight: 600;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.key:hover:not(.disabled) {
+  border-color: var(--color-primary-light);
+  background: var(--color-bg-card);
+}
+
+.key:active:not(.disabled) {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: scale(0.95);
+}
+
+.specialKey {
+  font-size: var(--size-lg);
+  background: var(--color-bg-card);
+}
+
+.deleteKey {
+  color: var(--color-error);
+}
+
+.submitKey {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+  font-size: var(--size-xl);
+}
+
+.submitKey:hover:not(.disabled) {
+  background: #059669;
+  border-color: #059669;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Touch optimization */
+@media (hover: none) {
+  .key:hover:not(.disabled) {
+    border-color: var(--color-border);
+    background: var(--color-bg);
+  }
+}

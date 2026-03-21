@@ -1,0 +1,95 @@
+.container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarCircle {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  border: 3px solid var(--color-secondary);
+}
+
+/* Sizes */
+.small .avatarCircle {
+  width: 48px;
+  height: 48px;
+}
+
+.small .emoji {
+  font-size: 24px;
+}
+
+.medium .avatarCircle {
+  width: 80px;
+  height: 80px;
+}
+
+.medium .emoji {
+  font-size: 40px;
+}
+
+.large .avatarCircle {
+  width: 120px;
+  height: 120px;
+}
+
+.large .emoji {
+  font-size: 60px;
+}
+
+/* Level Badge */
+.levelBadge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: var(--color-secondary);
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-bg-card);
+}
+
+.small .levelBadge {
+  width: 20px;
+  height: 20px;
+  bottom: -2px;
+  right: -2px;
+}
+
+.small .levelNumber {
+  font-size: 10px;
+}
+
+.medium .levelBadge {
+  width: 24px;
+  height: 24px;
+}
+
+.medium .levelNumber {
+  font-size: 12px;
+}
+
+.large .levelBadge {
+  width: 32px;
+  height: 32px;
+}
+
+.large .levelNumber {
+  font-size: 14px;
+}
+
+.levelNumber {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}

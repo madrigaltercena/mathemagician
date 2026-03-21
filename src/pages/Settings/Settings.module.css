@@ -1,0 +1,270 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  padding-bottom: calc(var(--space-4) + 80px);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.backButton {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.backButton:hover {
+  transform: scale(1.05);
+}
+
+.backButton:active {
+  transform: scale(0.95);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--size-lg);
+  color: var(--color-primary);
+}
+
+/* Settings List */
+.settingsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Setting Section */
+.settingSection {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+}
+
+/* Toggle */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2) 0;
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  color: var(--color-text);
+}
+
+.toggle {
+  width: 56px;
+  height: 32px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+
+.toggleOn {
+  background: var(--color-primary);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(24px);
+}
+
+/* Info Row */
+.infoRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.infoRow span:first-child {
+  font-family: var(--font-mono);
+  font-size: var(--size-lg);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.infoHint {
+  font-size: var(--size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Age Buttons */
+.ageButtons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.ageButton {
+  flex: 1;
+  padding: var(--space-3);
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--size-base);
+  font-weight: 600;
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+}
+
+.ageButton:hover {
+  border-color: var(--color-primary-light);
+}
+
+.ageButton.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+/* Radio Group */
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.radioLabel:hover {
+  background: var(--color-bg);
+}
+
+.radioInput {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary);
+}
+
+.radioText {
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  color: var(--color-text);
+}
+
+/* Language List */
+.languageList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.languageButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-bg);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.languageButton:hover {
+  border-color: var(--color-primary-light);
+}
+
+.languageButton.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.langFlag {
+  font-size: 24px;
+}
+
+.activeBadge {
+  margin-left: auto;
+  color: var(--color-secondary);
+}
+
+/* Danger Zone */
+.dangerZone {
+  border: 2px solid var(--color-error);
+}
+
+.dangerZone .sectionTitle {
+  color: var(--color-error);
+}
+
+.dangerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dangerText {
+  font-size: var(--size-sm);
+  color: var(--color-text-muted);
+}
+
+.resetButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-error);
+  color: white;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  font-weight: 700;
+  transition: all var(--transition-fast);
+}
+
+.resetButton:hover {
+  background: #E11D48;
+}

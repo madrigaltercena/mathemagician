@@ -1,0 +1,163 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  padding-bottom: calc(var(--space-4) + 80px);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.backButton {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.backButton:hover {
+  transform: scale(1.05);
+}
+
+.backButton:active {
+  transform: scale(0.95);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--size-lg);
+  color: var(--color-primary);
+}
+
+.xpBar {
+  margin-left: auto;
+  width: 120px;
+}
+
+/* Sections */
+.section {
+  margin-bottom: var(--space-5);
+}
+
+.sectionTitle {
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+  text-align: center;
+}
+
+/* Operation Grid */
+.operationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.operationCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  border: 3px solid transparent;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.operationCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.operationCard.selected {
+  border-color: var(--op-color);
+  background: linear-gradient(135deg, var(--color-bg-card) 0%, rgba(255,255,255,0.9) 100%);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--op-color) 30%, transparent);
+}
+
+.operationIcon {
+  color: var(--op-color);
+}
+
+.operationLabel {
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Difficulty Grid */
+.difficultyGrid {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.difficultyButton {
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  font-weight: 600;
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+}
+
+.difficultyButton:hover {
+  border-color: var(--color-primary-light);
+}
+
+.difficultyButton.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+/* Start Button */
+.startButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-5);
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-size: var(--size-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+  margin-top: auto;
+}
+
+.startButton:hover {
+  background: var(--color-primary-dark);
+  box-shadow: var(--shadow-lg);
+}
+
+.startButton:active {
+  transform: scale(0.98);
+}
