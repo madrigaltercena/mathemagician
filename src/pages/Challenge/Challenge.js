@@ -170,8 +170,12 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
   };
 
   const handleNext = () => {
-    // Generate new questions for next level
-    setQuestions(generateQuestions(operation, difficulty, 5));
+    // Get the current kingdom from state (updated by completeLevel)
+    const currentKingdom = state.progress.story.currentKingdom;
+    const nextOperation = currentKingdom || operation;
+    
+    // Generate new questions for next level using correct operation
+    setQuestions(generateQuestions(nextOperation, difficulty, 5));
     setCurrentIndex(0);
     setUserAnswer('');
     setHintsRemaining(3);
