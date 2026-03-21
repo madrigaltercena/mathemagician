@@ -261,23 +261,25 @@ export function GameProvider({ children }) {
         storyProgress.currentLevel = Math.min(level + 1, 25);
       }
       
-      // Update currentKingdom when completing all 25 levels of a kingdom
-      if (completedLevels.length >= 25) {
-        const kingdomOrder = ['addition', 'subtraction', 'multiplication', 'division'];
-        const currentIndex = kingdomOrder.indexOf(kingdom);
-        
-        // Unlock next kingdom
-        if (currentIndex < kingdomOrder.length - 1) {
-          const nextKingdom = kingdomOrder[currentIndex + 1];
-          if (!storyProgress.kingdomsUnlocked.includes(nextKingdom)) {
-            storyProgress.kingdomsUnlocked.push(nextKingdom);
-          }
+      // Advance kingdom based on level thresholds (spec-defined)
+      // Levels 1-11: addition, 12-17: subtraction, 18-24: multiplication, 25: division
+      const KINGDOM_ORDER = ['addition', 'subtraction', 'multiplication', 'division'];
+      const KINGDOM_THRESHOLDS = [1, 12, 18, 25];
+      
+      let nextKingdom = kingdom;
+      for (let i = KINGDOM_ORDER.length - 1; i >= 0; i--) {
+        if (level >= KINGDOM_THRESHOLDS[i]) {
+          nextKingdom = KINGDOM_ORDER[i];
+          break;
         }
-        
-        // Advance currentKingdom to next unlocked kingdom
-        if (currentIndex < kingdomOrder.length - 1) {
-          const nextKingdom = kingdomOrder[currentIndex + 1];
-          storyProgress.currentKingdom = nextKingdom;
+      }
+      
+      // Update currentKingdom and unlock kingdoms as thresholds are reached
+      if (nextKingdom !== storyProgress.currentKingdom) {
+        storyProgress.currentKingdom = nextKingdom;
+        // Unlock the new kingdom if not already unlocked
+        if (!storyProgress.kingdomsUnlocked.includes(nextKingdom)) {
+          storyProgress.kingdomsUnlocked.push(nextKingdom);
         }
       }
       

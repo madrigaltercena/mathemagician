@@ -79,7 +79,9 @@ export default function StoryMode() {
   };
 
   const isKingdomUnlocked = (kingdom) => {
-    return progress.story.kingdomsUnlocked.includes(kingdom.id);
+    // Check if kingdom is in unlocked list OR if current level meets threshold
+    return progress.story.kingdomsUnlocked.includes(kingdom.id) ||
+           progress.story.currentLevel >= kingdom.unlockLevel;
   };
 
   return (
