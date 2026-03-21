@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../../contexts/GameContext';
 import NumberPad from '../../components/NumberPad/NumberPad';
@@ -35,8 +35,11 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
   const { state, actions } = useGame();
   const { settings, player } = state;
   
+  // Use currentKingdom from state (not URL prop) for question generation
+  const currentKingdom = state.progress.story.currentKingdom;
+  
   const [questions, setQuestions] = useState(() => 
-    generateQuestions(operation, difficulty, 5)
+    generateQuestions(currentKingdom || operation, difficulty, 5)
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -49,6 +52,18 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
   const [answerState, setAnswerState] = useState(null); // 'correct', 'wrong', null
   const [shake, setShake] = useState(false);
   const [hintsUsedPerQuestion, setHintsUsedPerQuestion] = useState({}); // Track hint usage per question index
+  
+  // Regenerate questions when currentKingdom changes (e.g., after navigating back from menu)
+  useEffect(() => {
+    setQuestions(generateQuestions(currentKingdom || operation, difficulty, 5));
+    setCurrentIndex(0);
+    setUserAnswer('');
+    setHintsRemaining(3);
+    setHintsUsedPerQuestion({});
+    setCorrectCount(0);
+    setShowResult(false);
+    setAnswerState(null);
+  }, [currentKingdom]);
   
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;

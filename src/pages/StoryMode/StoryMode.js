@@ -133,19 +133,20 @@ export default function StoryMode() {
         </div>
       </section>
 
-      {/* Current Kingdom Info */}
+      {/* Current Kingdom Info - show the kingdom matching currentKingdom from state */}
       <section className={styles.currentKingdom}>
-        {KINGDOMS.filter(k => isKingdomUnlocked(k)).map((kingdom) => {
-          const completed = getKingdomProgress(kingdom.id);
+        {(() => {
+          const currentKingdomData = KINGDOMS.find(k => k.id === progress.story.currentKingdom) || KINGDOMS[0];
+          const completed = getKingdomProgress(currentKingdomData.id);
           const percentage = Math.round((completed / 25) * 100);
           
           return (
-            <div key={kingdom.id} className={styles.kingdomInfo}>
+            <div key={currentKingdomData.id} className={styles.kingdomInfo}>
               <div className={styles.kingdomHeader}>
-                <span className={styles.kingdomIconLarge}>{kingdom.icon}</span>
+                <span className={styles.kingdomIconLarge}>{currentKingdomData.icon}</span>
                 <div>
-                  <h2 className={styles.kingdomTitle}>{kingdom.name}</h2>
-                  <p className={styles.kingdomOp}>{kingdom.operation}</p>
+                  <h2 className={styles.kingdomTitle}>{currentKingdomData.name}</h2>
+                  <p className={styles.kingdomOp}>{currentKingdomData.operation}</p>
                 </div>
               </div>
               
@@ -153,7 +154,7 @@ export default function StoryMode() {
                 <div className={styles.progressBar}>
                   <div 
                     className={styles.progressFill}
-                    style={{ width: `${percentage}%`, background: kingdom.color }}
+                    style={{ width: `${percentage}%`, background: currentKingdomData.color }}
                   />
                 </div>
                 <span className={styles.progressLabel}>Progresso: {percentage}%</span>
@@ -164,7 +165,7 @@ export default function StoryMode() {
               </p>
             </div>
           );
-        })[0] || <p className={styles.noKingdom}>Completa os reinos para desbloquear mais!</p>}
+        })()}
       </section>
 
       {/* Continue Button */}
