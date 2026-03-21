@@ -267,13 +267,12 @@ export function GameProvider({ children }) {
       
       // Update current level if next
       if (level >= storyProgress.currentLevel) {
-        storyProgress.currentLevel = Math.min(level + 1, 20);
+        storyProgress.currentLevel = Math.min(level + 1, 16);
       }
       
-      // Advance kingdom based on level thresholds
-      // Levels 1-4: addition, 5-9: subtraction, 10-14: multiplication, 15+: division
-      const KINGDOM_ORDER = ['addition', 'subtraction', 'multiplication', 'division'];
-      const KINGDOM_THRESHOLDS = [1, 5, 10, 15];
+      // Advance kingdom based on level thresholds (8 kingdoms)
+      const KINGDOM_ORDER = ['kingdom1', 'kingdom2', 'kingdom3', 'kingdom4', 'kingdom5', 'kingdom6', 'kingdom7', 'kingdom8'];
+      const KINGDOM_THRESHOLDS = [1, 3, 5, 7, 9, 11, 13, 15];
       
       let nextKingdom = kingdom;
       for (let i = KINGDOM_ORDER.length - 1; i >= 0; i--) {

@@ -4,148 +4,113 @@ import { useGame } from '../../contexts/GameContext';
 import XPBar from '../../components/XPBar/XPBar';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import { motion } from 'framer-motion';
-import {
-  ArrowLeft,
-  Lightning,
-} from '@phosphor-icons/react';
+import { ArrowLeft, Lightning } from '@phosphor-icons/react';
 import styles from './StoryMode.module.css';
 
+// 8 kingdoms, 2 levels each, 5 questions per level = 80 total questions
 const KINGDOMS = [
-  { 
-    id: 'addition', 
-    name: 'Reino Dourado', 
-    icon: '🟡',
-    operation: 'Adição',
-    color: 'var(--color-kingdom-add)',
-    unlockLevel: 0,
-    totalLevels: 4, // levels 1-4
-  },
-  { 
-    id: 'subtraction', 
-    name: 'Cavernas de Cristal', 
-    icon: '🔵',
-    operation: 'Subtração',
-    color: 'var(--color-kingdom-sub)',
-    unlockLevel: 5,
-    totalLevels: 5, // levels 5-9
-  },
-  { 
-    id: 'multiplication', 
-    name: 'Floresta de Fogo', 
-    icon: '🔴',
-    operation: 'Multiplicação',
-    color: 'var(--color-kingdom-mul)',
-    unlockLevel: 10,
-    totalLevels: 5, // levels 10-14
-  },
-  { 
-    id: 'division', 
-    name: 'Montanhas Esmeralda', 
-    icon: '🟢',
-    operation: 'Divisão',
-    color: 'var(--color-kingdom-div)',
-    unlockLevel: 15,
-    totalLevels: 6, // levels 15-20
-  },
+  { id: 'kingdom1', name: 'Reino dos Números Pequenos', icon: '🟡', operation: 'Somas e Subtrações', color: 'var(--color-kingdom-add)', unlockLevel: 1, totalLevels: 2, year: 1 },
+  { id: 'kingdom2', name: 'Reino dos Números Crescidos', icon: '🟠', operation: 'Mais Somas e Tabuadas', color: 'var(--color-kingdom-add)', unlockLevel: 3, totalLevels: 2, year: 1 },
+  { id: 'kingdom3', name: 'Reino das Tabuadas', icon: '🔵', operation: 'Tabuadas e Mais', color: 'var(--color-kingdom-sub)', unlockLevel: 5, totalLevels: 2, year: 2 },
+  { id: 'kingdom4', name: 'Reino dos Grandes Números', icon: '🔷', operation: 'Somas e Tabuadas Grandes', color: 'var(--color-kingdom-sub)', unlockLevel: 7, totalLevels: 2, year: 2 },
+  { id: 'kingdom5', name: 'Reino da Multiplicação', icon: '🔴', operation: 'Multiplicar e Dividir', color: 'var(--color-kingdom-mul)', unlockLevel: 9, totalLevels: 2, year: 3 },
+  { id: 'kingdom6', name: 'Reino da Divisão', icon: '🔺', operation: 'Divisão e Multiplicação', color: 'var(--color-kingdom-mul)', unlockLevel: 11, totalLevels: 2, year: 3 },
+  { id: 'kingdom7', name: 'Reino dos Desafiões Grandes', icon: '🟢', operation: 'Grandes Desafios', color: 'var(--color-kingdom-div)', unlockLevel: 13, totalLevels: 2, year: 4 },
+  { id: 'kingdom8', name: 'Reino dos Mágicos', icon: '💜', operation: 'O Grande Des Finale', color: 'var(--color-kingdom-div)', unlockLevel: 15, totalLevels: 2, year: 4 },
 ];
+
+// Which level completes each kingdom
+const KINGDOM_COMPLETION = { 2: 1, 4: 2, 6: 3, 8: 4, 10: 5, 12: 6, 14: 7, 16: 8 };
+
+// Half-year milestones (level 2, 4, 6, 8, 10, 12, 14, 16)
+const HALF_YEAR_LEVELS = [2, 4, 6, 8, 10, 12, 14, 16];
+
+// Full year milestones (level 4, 8, 12, 16)
+const YEAR_COMPLETION_LEVELS = [4, 8, 12, 16];
+
+// Year names for messages
+const YEAR_NAMES = { 1: '1º ano', 2: '2º ano', 3: '3º ano', 4: '4º ano' };
 
 export default function StoryMode() {
   const navigate = useNavigate();
   const { state } = useGame();
   const { progress, settings, player } = state;
-  
-  const getDifficulty = () => {
-    if (settings.difficultyOverride !== 'auto') return settings.difficultyOverride;
-    if (player.age <= 6) return 'easy';
-    if (player.age <= 8) return 'medium';
-    return 'hard';
-  };
-
-  const handleKingdomSelect = (kingdom) => {
-    const isUnlocked = progress.story.kingdomsUnlocked.includes(kingdom.id);
-    if (isUnlocked) {
-      navigate(`/challenge/${kingdom.id}?difficulty=${getDifficulty()}&mode=story`);
-    }
-  };
-
-  const handleContinue = () => {
-    const currentKingdom = progress.story.currentKingdom || 'addition';
-    navigate(`/challenge/${currentKingdom}?difficulty=${getDifficulty()}&mode=story`);
-  };
-
-  const handleBack = () => {
-    navigate('/');
-  };
 
   const getKingdomProgress = (kingdomId) => {
+    const kingdom = KINGDOMS.find(k => k.id === kingdomId);
     const completed = progress.story.completedLevels[kingdomId]?.length || 0;
     return completed;
   };
 
   const isKingdomUnlocked = (kingdom) => {
-    // Check if kingdom is in unlocked list OR if current level meets threshold
-    return progress.story.kingdomsUnlocked.includes(kingdom.id) ||
-           progress.story.currentLevel >= kingdom.unlockLevel;
+    return progress.story.currentLevel >= kingdom.unlockLevel;
   };
+
+  const handleKingdomSelect = (kingdom) => {
+    if (!isKingdomUnlocked(kingdom)) return;
+    navigate(`/challenge/${kingdom.id}?mode=story`);
+  };
+
+  const handleContinue = () => {
+    const currentKingdomId = progress.story.currentKingdom || 'kingdom1';
+    navigate(`/challenge/${currentKingdomId}?mode=story`);
+  };
+
+  // Get year milestone type for current level
+  const getYearMilestone = (level) => {
+    if (YEAR_COMPLETION_LEVELS.includes(level)) return 'year_complete';
+    if (HALF_YEAR_LEVELS.includes(level)) return 'half_year';
+    return null;
+  };
+
+  // Current kingdom for display
+  const currentKingdomId = progress.story.currentKingdom || 'kingdom1';
+  const currentKingdomData = KINGDOMS.find(k => k.id === currentKingdomId) || KINGDOMS[0];
 
   return (
     <div className={styles.container}>
-      {/* Header */}
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={handleBack}>
+        <button className={styles.backButton} onClick={() => navigate('/')}>
           <ArrowLeft size={24} weight="bold" />
         </button>
-        <h1 className={styles.title}>⚔️ MODO HISTÓRIA</h1>
-        <div className={styles.xpBar}>
-          <XPBar compact />
-        </div>
+        <h1 className={styles.title}>Zooterprise</h1>
+        <XPBar compact />
       </header>
 
-      {/* Kingdom Map */}
-      <section className={styles.kingdomMap}>
-        <div className={styles.castleSection}>
-          <div className={styles.castle}>🏰</div>
-          <p className={styles.castleLabel}>CASTELO CENTRAL</p>
-          <p className={styles.castleSubLabel}>(Você está aqui)</p>
-        </div>
+      <div className={styles.journeyPath}>
+        <div className={styles.pathLine} />
+        {KINGDOMS.map((kingdom, index) => {
+          const unlocked = isKingdomUnlocked(kingdom);
+          const completed = getKingdomProgress(kingdom.id) >= kingdom.totalLevels;
+          const isActive = unlocked && !completed;
+          const isPast = completed;
 
-        <div className={styles.kingdomPaths}>
-          {KINGDOMS.map((kingdom, index) => {
-            const completed = getKingdomProgress(kingdom.id);
-            const unlocked = isKingdomUnlocked(kingdom);
-            const isCompleted = completed >= kingdom.totalLevels;
-            
-            return (
-              <motion.div
-                key={kingdom.id}
-                className={`${styles.kingdomNode} ${!unlocked ? styles.locked : ''} ${isCompleted ? styles.completed : ''}`}
-                style={{ '--kingdom-color': kingdom.color }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
+          return (
+            <React.Fragment key={kingdom.id}>
+              <div
+                className={`${styles.kingdomNode} ${!unlocked ? styles.locked : ''} ${isActive ? styles.active : ''} ${isPast ? styles.completed : ''}`}
                 onClick={() => handleKingdomSelect(kingdom)}
               >
-                <div className={styles.kingdomIcon}>
-                  {kingdom.icon}
-                </div>
+                <div className={styles.kingdomIcon}>{unlocked ? kingdom.icon : '🔒'}</div>
                 <span className={styles.kingdomName}>{kingdom.name}</span>
-                {!unlocked && <span className={styles.lockIcon}>🔒</span>}
-                {isCompleted && <span className={styles.checkIcon}>✅</span>}
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
+              </div>
+              {index < KINGDOMS.length - 1 && (
+                <div className={`${styles.connector} ${unlocked ? styles.connectorActive : ''}`}>
+                  {isPast ? '✅' : '○'}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
 
-      {/* Current Kingdom Info - show the kingdom matching currentKingdom from state */}
+      {/* Current Kingdom Info */}
       <section className={styles.currentKingdom}>
         {(() => {
-          const currentKingdomData = KINGDOMS.find(k => k.id === progress.story.currentKingdom) || KINGDOMS[0];
           const completed = getKingdomProgress(currentKingdomData.id);
           const percentage = Math.round((completed / currentKingdomData.totalLevels) * 100);
-          
           return (
-            <div key={currentKingdomData.id} className={styles.kingdomInfo}>
+            <div className={styles.kingdomInfo}>
               <div className={styles.kingdomHeader}>
                 <span className={styles.kingdomIconLarge}>{currentKingdomData.icon}</span>
                 <div>
@@ -153,32 +118,20 @@ export default function StoryMode() {
                   <p className={styles.kingdomOp}>{currentKingdomData.operation}</p>
                 </div>
               </div>
-              
               <div className={styles.progressSection}>
                 <div className={styles.progressBar}>
-                  <div 
-                    className={styles.progressFill}
-                    style={{ width: `${percentage}%`, background: currentKingdomData.color }}
-                  />
+                  <div className={styles.progressFill} style={{ width: `${percentage}%`, background: currentKingdomData.color }} />
                 </div>
                 <span className={styles.progressLabel}>{completed}/{currentKingdomData.totalLevels} ({percentage}%)</span>
               </div>
-              
-              <p className={styles.levelInfo}>
-                Nível {progress.story.currentLevel} — {currentKingdomData.name}
-              </p>
+              <p className={styles.levelInfo}>Nível {progress.story.currentLevel} — {currentKingdomData.name}</p>
             </div>
           );
         })()}
       </section>
 
       {/* Continue Button */}
-      <motion.button
-        className={styles.continueButton}
-        onClick={handleContinue}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
+      <motion.button className={styles.continueButton} onClick={handleContinue} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <Lightning size={24} weight="fill" />
         <span>CONTINUAR AVENTURA</span>
       </motion.button>

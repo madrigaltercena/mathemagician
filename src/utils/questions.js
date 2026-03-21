@@ -1,158 +1,115 @@
-// Question generation utilities
-// Level-based difficulty: each level (1-20) has specific number ranges and operations
+// Question generation — level-based difficulty
+// 16 levels, 8 kingdoms (2 per year), 5 questions per level
 
-// Random integer in range [min, max] (inclusive)
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Per-level configuration: operation, RESULT ranges, and multipliers/divisors
-// The RESULT of the operation is always within the specified range
+// LEVEL_CONFIG: each level specifies operation type(s), result range, tables, digits
+// Result range = the actual answer to the question (not operand size)
 const LEVEL_CONFIG = {
-  // ─── REINO 1 (6 anos): levels 1-4, addition/subtraction ───
-  1:  { ops: ['addition', 'subtraction'], resultRange: [1, 10] },
-  2:  { ops: ['addition', 'subtraction'], resultRange: [5, 20] },
-  3:  { ops: ['addition', 'subtraction'], resultRange: [10, 40] },
-  4:  { ops: ['addition', 'subtraction'], resultRange: [15, 60] },
+  // ─── REINO 1 — Níveis 1-2 (1º Ano, resultados 1-10) ───
+  1: { ops: ['addition', 'subtraction'], resultRange: [1, 10] },
+  2: { ops: ['addition', 'subtraction'], resultRange: [1, 10] },
 
-  // ─── REINO 2 (7 anos): levels 5-9, add/sub + times tables ───
-  5:  { ops: ['addition'],           resultRange: [10, 100],  tables: [2, 5] },
-  6:  { ops: ['subtraction'],        resultRange: [10, 100],  tables: [3, 4] },
-  7:  { ops: ['addition', 'subtraction'], resultRange: [10, 100], tables: [2, 3, 4] },
-  8:  { ops: ['addition', 'subtraction'], resultRange: [50, 300], tables: [4, 5, 6, 7, 8, 9] },
-  9:  { ops: ['addition', 'subtraction'], resultRange: [100, 500], tables: [5, 6, 7, 8, 9] },
+  // ─── REINO 2 — Níveis 3-4 (1º Ano, resultados 5-20) ───
+  3: { ops: ['addition', 'subtraction'], resultRange: [5, 20] },
+  4: { ops: ['addition', 'subtraction'], resultRange: [5, 20] },
 
-  // ─── REINO 3 (8 anos): levels 10-14, multiplication and division ───
-  10: { ops: ['multiplication'], resultRange: [1, 50],  tables: [2, 3, 4, 5] },   // e.g. 6×7=42
-  11: { ops: ['multiplication'], resultRange: [10, 200], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] }, // e.g. 45×6=270
-  12: { ops: ['division'],       resultRange: [1, 10],  divTable: [2, 3, 4, 5, 6, 7, 8, 9] }, // e.g. 72÷8=9
-  13: { ops: ['division'],       resultRange: [1, 20],  divTable: [2, 3, 4, 5, 6, 7, 8, 9] }, // e.g. 48÷6=8
-  14: { ops: ['multiplication', 'division'], resultRange: [10, 100], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
+  // ─── REINO 3 — Níveis 5-6 (2º Ano, + tabuadas 2,3,4,5) ───
+  5: { ops: ['addition', 'subtraction', 'multiplication'], resultRange: [10, 100], tables: [2, 3, 4, 5] },
+  6: { ops: ['addition', 'subtraction', 'multiplication'], resultRange: [10, 100], tables: [2, 3, 4, 5] },
 
-  // ─── REINO 4 (9-10 anos): levels 15-20, harder mul/div ───
-  15: { ops: ['multiplication', 'division'], resultRange: [10, 200],  tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
-  16: { ops: ['multiplication', 'division'], resultRange: [20, 500],  tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
-  17: { ops: ['multiplication', 'division'], resultRange: [50, 1000], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
-  18: { ops: ['multiplication', 'division'], resultRange: [100, 2000], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
-  19: { ops: ['multiplication', 'division'], resultRange: [100, 5000], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
-  20: { ops: ['multiplication', 'division'], resultRange: [100, 10000], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
+  // ─── REINO 4 — Níveis 7-8 (2º Ano, tabuadas 2-5, mais difíceis) ───
+  7: { ops: ['addition', 'subtraction', 'multiplication'], resultRange: [50, 200], tables: [2, 3, 4, 5] },
+  8: { ops: ['addition', 'subtraction', 'multiplication'], resultRange: [50, 200], tables: [2, 3, 4, 5] },
+
+  // ─── REINO 5 — Níveis 9-10 (3º Ano, ×1 dígito, ÷1 dígito) ───
+  9:  { ops: ['multiplication', 'division'], resultRange: [10, 100], tables: [2, 3, 4, 5, 6, 7, 8, 9] },
+  10: { ops: ['multiplication', 'division'], resultRange: [10, 100], tables: [2, 3, 4, 5, 6, 7, 8, 9] },
+
+  // ─── REINO 6 — Níveis 11-12 (3º Ano, ×2 dígitos, ÷2 dígitos) ───
+  11: { ops: ['multiplication', 'division'], resultRange: [50, 500], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
+  12: { ops: ['multiplication', 'division'], resultRange: [50, 500], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
+
+  // ─── REINO 7 — Níveis 13-14 (4º Ano, ×÷ harder) ───
+  13: { ops: ['multiplication', 'division'], resultRange: [100, 2000], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
+  14: { ops: ['multiplication', 'division'], resultRange: [100, 2000], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
+
+  // ─── REINO 8 — Níveis 15-16 (4º Ano, hardest + expressões) ───
+  15: { ops: ['multiplication', 'division', 'expression'], resultRange: [100, 5000], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
+  16: { ops: ['multiplication', 'division', 'expression'], resultRange: [100, 10000], tables: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
 };
 
-// ─── Addition: result is in range ───
+// ─── Helpers ────────────────────────────────────────────────
+
 function makeAdd(lvl) {
-  const [min, max] = LEVEL_CONFIG[lvl].resultRange || [1, 100];
+  const [min, max] = LEVEL_CONFIG[lvl].resultRange;
   const result = rand(min, max);
-  const a = rand(1, result - 1);
+  const a = rand(1, Math.max(1, result - 1));
   const b = result - a;
-  return {
-    id: Date.now() + Math.random(),
-    type: 'addition',
-    question: `${a} + ${b} = ?`,
-    answer: result,
-    operands: [a, b],
-    hint: `${a} + ${b}`,
-  };
+  return { id: Date.now() + Math.random(), type: 'addition', question: `${a} + ${b} = ?`, answer: result, operands: [a, b], hint: `${a} + ${b}` };
 }
 
-// ─── Subtraction: result is in range ───
 function makeSub(lvl) {
-  const [min, max] = LEVEL_CONFIG[lvl].resultRange || [1, 100];
+  const [min, max] = LEVEL_CONFIG[lvl].resultRange;
   const result = rand(min, max);
-  // minuend must be larger than result to keep it positive
   const a = rand(result, result + rand(5, 20));
   const b = a - result;
-  return {
-    id: Date.now() + Math.random(),
-    type: 'subtraction',
-    question: `${a} - ${b} = ?`,
-    answer: result,
-    operands: [a, b],
-    hint: `${a} - ${b}`,
-  };
+  return { id: Date.now() + Math.random(), type: 'subtraction', question: `${a} - ${b} = ?`, answer: result, operands: [a, b], hint: `${a} - ${b}` };
 }
 
-// ─── Multiplication: result is in range ───
 function makeMul(lvl) {
   const cfg = LEVEL_CONFIG[lvl];
   const tables = cfg.tables || [2, 3, 4, 5, 10];
-  const [min, max] = cfg.resultRange || [1, 100];
+  const [min, max] = cfg.resultRange;
   const table = tables[rand(0, tables.length - 1)];
-
-  // Find multiplicand so that result is in range
-  // result = a * table → a = result / table
-  // We need a * table in [min, max]
   const minA = Math.max(1, Math.ceil(min / table));
   const maxA = Math.floor(max / table);
-  if (minA > maxA) {
-    // Fallback: just pick a and hope
-    const a = rand(1, 10);
-    return {
-      id: Date.now() + Math.random(),
-      type: 'multiplication',
-      question: `${a} × ${table} = ?`,
-      answer: a * table,
-      operands: [a, table],
-      hint: `${a} × ${table}`,
-    };
-  }
-  const a = rand(minA, maxA);
-  return {
-    id: Date.now() + Math.random(),
-    type: 'multiplication',
-    question: `${a} × ${table} = ?`,
-    answer: a * table,
-    operands: [a, table],
-    hint: `${a} × ${table}`,
-  };
+  const a = minA <= maxA ? rand(minA, maxA) : rand(1, 10);
+  return { id: Date.now() + Math.random(), type: 'multiplication', question: `${a} × ${table} = ?`, answer: a * table, operands: [a, table], hint: `${a} × ${table}` };
 }
 
-// ─── Division: result is in range (exact, no decimals) ───
 function makeDiv(lvl) {
   const cfg = LEVEL_CONFIG[lvl];
-  const divTable = cfg.divTable || cfg.tables || [2, 3, 4, 5, 6, 7, 8, 9];
-  const [min, max] = cfg.resultRange || [1, 100];
-
-  // Pick a divisor from the table
+  const divTable = cfg.tables || [2, 3, 4, 5, 6, 7, 8, 9];
+  const [min, max] = cfg.resultRange;
   const b = divTable[rand(0, divTable.length - 1)];
-
-  // Find quotient so that result is in range
-  // result = quotient, a = quotient * b → result * b
   const minQ = Math.max(1, Math.ceil(min / b));
   const maxQ = Math.floor(max / b);
-  if (minQ > maxQ) {
-    // Fallback
-    const quotient = rand(1, 10);
-    return {
-      id: Date.now() + Math.random(),
-      type: 'division',
-      question: `${quotient * b} ÷ ${b} = ?`,
-      answer: quotient,
-      operands: [quotient * b, b],
-      hint: `${quotient * b} ÷ ${b}`,
-    };
-  }
-  const quotient = rand(minQ, maxQ);
+  const quotient = minQ <= maxQ ? rand(minQ, maxQ) : rand(1, 10);
+  return { id: Date.now() + Math.random(), type: 'division', question: `${quotient * b} ÷ ${b} = ?`, answer: quotient, operands: [quotient * b, b], hint: `${quotient * b} ÷ ${b}` };
+}
+
+function makeExpr(lvl) {
+  const [min, max] = LEVEL_CONFIG[lvl].resultRange;
+  const a = rand(Math.max(10, min), Math.min(max, 1000));
+  const b = rand(Math.max(10, min), Math.min(max, 1000));
+  const c = rand(2, 9);
+  // (a + b) × c
+  const result = (a + b) * c;
   return {
     id: Date.now() + Math.random(),
-    type: 'division',
-    question: `${quotient * b} ÷ ${b} = ?`,
-    answer: quotient,
-    operands: [quotient * b, b],
-    hint: `${quotient * b} ÷ ${b}`,
+    type: 'expression',
+    question: `(${a} + ${b}) × ${c} = ?`,
+    answer: result,
+    operands: [a, b, c],
+    hint: `Resolve primeiro (a + b), depois multiplica por ${c}!`,
   };
 }
 
-// ─── Generate batch of questions for a kingdom + level ───
+// ─── Main generator ──────────────────────────────────────────
+
 export function generateQuestions(kingdom, level, count = 5) {
   const cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG[1];
   const ops = cfg.ops || ['addition'];
-
   const questions = [];
   for (let i = 0; i < count; i++) {
     const op = ops[rand(0, ops.length - 1)];
     let q;
     if (op === 'multiplication') q = makeMul(level);
     else if (op === 'division') q = makeDiv(level);
+    else if (op === 'expression') q = makeExpr(level);
     else if (op === 'subtraction') q = makeSub(level);
     else q = makeAdd(level);
     questions.push(q);
@@ -160,47 +117,19 @@ export function generateQuestions(kingdom, level, count = 5) {
   return questions;
 }
 
-// ─── Hint generation ───
 export function generateHint(question) {
   const { type, operands } = question;
   const [a, b] = operands;
-
   switch (type) {
-    case 'addition':
-      return [
-        `Vamos somar!`,
-        `${a} + ${b}`,
-        `Podes contar nos dedos ou fazer de cabeça.`,
-        `O resultado é ${a + b}!`,
-      ];
-    case 'subtraction':
-      return [
-        `Vamos subtrair!`,
-        `${a} - ${b}`,
-        `Tira ${b} de ${a}.`,
-        `O resultado é ${a - b}!`,
-      ];
-    case 'multiplication':
-      return [
-        `Conta de ${b} em ${b}!`,
-        `${b}, ${b * 2}, ${b * 3}...`,
-        `Ou soma ${a} vezes: ${a} + ${a}...`,
-        `${a} × ${b} = ${a * b}`,
-      ];
-    case 'division':
-      return [
-        `Pergunta: quantas vezes cabe ${b} em ${a}?`,
-        `Usa a tabuada do ${b}!`,
-        `${b} × ${Math.floor(a / b)} = ${b * Math.floor(a / b)}`,
-        `Sobra ${a % b > 0 ? `${a % b}` : 'nada'}!`,
-        `${a} ÷ ${b} = ${a / b}`,
-      ];
-    default:
-      return [`Tenta resolver!`, `O resultado é ${question.answer}`];
+    case 'addition': return [`${a} + ${b}`, `Conta!`, `O resultado é ${a + b}!`];
+    case 'subtraction': return [`${a} - ${b}`, `Tira ${b} de ${a}.`, `O resultado é ${a - b}!`];
+    case 'multiplication': return [`Conta de ${b} em ${b}!`, `${a} × ${b} = ${a * b}`];
+    case 'division': return [`Quantas vezes cabe ${b} em ${a}?`, `${a} ÷ ${b} = ${a / b}`];
+    case 'expression': return [`Resolve primeiro o que está dentro dos parênteses!`, `Depois multiplica!`, `O resultado é ${question.answer}!`];
+    default: return [`O resultado é ${question.answer}!`];
   }
 }
 
-// ─── Stars: based on correct answers ───
 export function calculateStars(correct, total) {
   const pct = (correct / total) * 100;
   if (pct >= 100) return 3;

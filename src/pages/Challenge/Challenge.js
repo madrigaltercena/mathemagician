@@ -18,17 +18,25 @@ import {
 import styles from './Challenge.module.css';
 
 const OPERATION_LABELS = {
-  addition: 'Adição',
-  subtraction: 'Subtração',
-  multiplication: 'Multiplicação',
-  division: 'Divisão',
+  kingdom1: 'Somas e Subtrações',
+  kingdom2: 'Mais Somas e Tabuadas',
+  kingdom3: 'Tabuadas e Mais',
+  kingdom4: 'Somas e Tabuadas Grandes',
+  kingdom5: 'Multiplicar e Dividir',
+  kingdom6: 'Divisão e Multiplicação',
+  kingdom7: 'Grandes Desafios',
+  kingdom8: 'O Grande Des Finale',
 };
 
 const KINGDOM_NAMES = {
-  addition: 'Reino Dourado',
-  subtraction: 'Cavernas de Cristal',
-  multiplication: 'Floresta de Fogo',
-  division: 'Montanhas Esmeralda',
+  kingdom1: 'Reino dos Números Pequenos',
+  kingdom2: 'Reino dos Números Crescidos',
+  kingdom3: 'Reino das Tabuadas',
+  kingdom4: 'Reino dos Grandes Números',
+  kingdom5: 'Reino da Multiplicação',
+  kingdom6: 'Reino da Divisão',
+  kingdom7: 'Reino dos Desafios Grandes',
+  kingdom8: 'Reino dos Mágicos',
 };
 
 export default function Challenge({ operation = 'addition', level = 1, mode = 'story', onBack, onComplete }) {
@@ -120,20 +128,14 @@ export default function Challenge({ operation = 'addition', level = 1, mode = 's
     const totalHintsUsed = Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0);
     const xpEarned = (stars * 10) - (totalHintsUsed * 3);
     
-    const kingdomMap = {
-      addition: 'addition',
-      subtraction: 'subtraction',
-      multiplication: 'multiplication',
-      division: 'division',
-    };
-    
     const completedLevel = state.progress.story.currentLevel;
-    actions.completeLevel(kingdomMap[operation], completedLevel, stars, Math.max(0, xpEarned), totalHintsUsed);
+    actions.completeLevel(operation, completedLevel, stars, Math.max(0, xpEarned), totalHintsUsed);
     
-    // Check if this level completes an age group (4, 9, 14, 20)
-    const AGE_COMPLETION_LEVELS = [4, 9, 14, 20];
-    if (AGE_COMPLETION_LEVELS.includes(completedLevel)) {
+    // Show milestone modal at half-year (2,4,6,8,10,12,14) and full-year (4,8,12,16) — we show at all half-year levels
+    const HALF_YEAR_LEVELS = [2, 4, 6, 8, 10, 12, 14, 16];
+    if (HALF_YEAR_LEVELS.includes(completedLevel)) {
       setShowAgeCompletion(true);
+      setShowResult(false);
     } else {
       setShowResult(true);
     }
@@ -205,7 +207,7 @@ export default function Challenge({ operation = 'addition', level = 1, mode = 's
       actions.updateProgress(currentProgress);
     }
     
-    setQuestions(generateQuestions(operation, state.progress.story.currentLevel, 5));
+    setQuestions(generateQuestions(currentKingdom || operation, state.progress.story.currentLevel, 5));
     setCurrentIndex(0);
     setUserAnswer('');
     setHintsRemaining(3);
