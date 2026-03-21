@@ -63,6 +63,7 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
     setCorrectCount(0);
     setShowResult(false);
     setAnswerState(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentKingdom]);
   
   const currentQuestion = questions[currentIndex];
