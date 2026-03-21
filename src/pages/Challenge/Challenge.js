@@ -31,7 +31,7 @@ const KINGDOM_NAMES = {
   division: 'Montanhas Esmeralda',
 };
 
-export default function Challenge({ operation = 'addition', difficulty = 'easy', onBack, onComplete }) {
+export default function Challenge({ operation = 'addition', difficulty = 'easy', mode = 'story', onBack, onComplete }) {
   const { state, actions } = useGame();
   const { settings, player } = state;
   
@@ -41,7 +41,6 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [hintsRemaining, setHintsRemaining] = useState(3);
-  const [hintsUsed, setHintsUsed] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [currentHint, setCurrentHint] = useState([]);
   const [hintStep, setHintStep] = useState(0);
@@ -49,6 +48,7 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
   const [showResult, setShowResult] = useState(false);
   const [answerState, setAnswerState] = useState(null); // 'correct', 'wrong', null
   const [shake, setShake] = useState(false);
+  const [hintsUsedPerQuestion, setHintsUsedPerQuestion] = useState({}); // Track hint usage per question index
   
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
@@ -98,7 +98,9 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
   
   const finishChallenge = () => {
     const stars = calculateStars(correctCount, questions.length);
-    const xpEarned = calculateXP(difficulty, hintsUsed);
+    // Calculate total hints used across all questions for XP calculation
+    const totalHintsUsed = Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0);
+    const xpEarned = calculateXP(difficulty, totalHintsUsed, mode);
     
     // Save progress
     const kingdomMap = {
@@ -108,7 +110,7 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
       division: 'division',
     };
     
-    actions.completeLevel(kingdomMap[operation], state.progress.story.currentLevel, stars, xpEarned, hintsUsed);
+    actions.completeLevel(kingdomMap[operation], state.progress.story.currentLevel, stars, xpEarned, totalHintsUsed);
     setShowResult(true);
   };
   
@@ -119,7 +121,11 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
     setCurrentHint(hint);
     setHintStep(0);
     setHintsRemaining(prev => prev - 1);
-    setHintsUsed(prev => prev + 1);
+    // Track hint usage for this specific question
+    setHintsUsedPerQuestion(prev => ({
+      ...prev,
+      [currentIndex]: (prev[currentIndex] || 0) + 1
+    }));
     setShowHint(true);
   };
   
@@ -150,7 +156,7 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
     setCurrentIndex(0);
     setUserAnswer('');
     setHintsRemaining(3);
-    setHintsUsed(0);
+    setHintsUsedPerQuestion({});
     setCorrectCount(0);
     setShowResult(false);
     setAnswerState(null);
@@ -236,7 +242,7 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            🌟 Correto! +{calculateXP(difficulty, hintsUsed > 0 ? 1 : 0)} XP
+            🌟 Correto! +{calculateXP(difficulty, hintsUsedPerQuestion[currentIndex] || 0, mode)} XP
           </motion.div>
         )}
         {answerState === 'wrong' && (
@@ -266,8 +272,8 @@ export default function Challenge({ operation = 'addition', difficulty = 'easy',
         isOpen={showResult}
         correct={correctCount}
         total={questions.length}
-        xpEarned={calculateXP(difficulty, hintsUsed)}
-        hintsUsed={hintsUsed}
+        xpEarned={calculateXP(difficulty, Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0), mode)}
+        hintsUsed={Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0)}
         streak={player.currentStreak}
         onClose={handleResultClose}
         onRetry={handleRetry}

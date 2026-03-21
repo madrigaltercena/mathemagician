@@ -204,17 +204,24 @@ export function generateHint(question) {
   }
 }
 
-// Calculate XP based on difficulty and hints
-export function calculateXP(difficulty, hintsUsed) {
+// Calculate XP based on difficulty, hints, and mode
+export function calculateXP(difficulty, hintsUsed, mode = 'story') {
   const baseXP = {
     easy: 10,
     medium: 20,
     hard: 35,
   };
   
-  const base = baseXP[difficulty] || 10;
+  let base = baseXP[difficulty] || 10;
+  
+  // Cap XP at 50% for freeplay mode
+  if (mode === 'freeplay') {
+    base = Math.floor(base * 0.5);
+  }
+  
+  // 50% XP when hint used
   if (hintsUsed > 0) {
-    return Math.floor(base * 0.5); // 50% XP when hint used
+    return Math.floor(base * 0.5);
   }
   return base;
 }

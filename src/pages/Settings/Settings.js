@@ -2,6 +2,7 @@ import React from 'react';
 import { useGame } from '../../contexts/GameContext';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../../components/BottomNav/BottomNav';
+import XPBar from '../../components/XPBar/XPBar';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -52,16 +53,11 @@ export default function Settings() {
 
   const handleResetProgress = () => {
     const confirmed = window.confirm(
-      '⚠️ CUIDADO! Esta ação vai apagar TODO o teu progresso. Tens a certeza que queres continuar?'
+      '⚠️ CUIDADO! Esta ação vai apagar TODO o teu progresso. Tens a certeza que queres apagar tudo?'
     );
     if (confirmed) {
-      const pin = window.prompt('Introduz o PIN de confirmação (usa 1234 para teste):');
-      if (pin === '1234') {
-        actions.resetGame();
-        navigate('/');
-      } else if (pin !== null) {
-        alert('PIN incorreto. O progresso não foi apagado.');
-      }
+      actions.resetGame();
+      navigate('/');
     }
   };
 
@@ -73,6 +69,9 @@ export default function Settings() {
           <ArrowLeft size={24} weight="bold" />
         </button>
         <h1 className={styles.title}>⚙️ DEFINIÇÕES</h1>
+        <div className={styles.xpBar}>
+          <XPBar compact />
+        </div>
       </header>
 
       {/* Settings Sections */}

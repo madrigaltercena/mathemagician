@@ -36,7 +36,7 @@ export default function Home() {
   const kingdoms = ['addition', 'subtraction', 'multiplication', 'division'];
   
   const getKingdomProgress = (kingdom) => {
-    const completed = progress.story.completedLevels[kingdom]?.filter(Boolean).length || 0;
+    const completed = progress.story.completedLevels[kingdom]?.length || 0;
     const isUnlocked = progress.story.kingdomsUnlocked.includes(kingdom);
     return { completed, isUnlocked, total: 25 };
   };

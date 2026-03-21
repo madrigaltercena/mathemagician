@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGame } from '../../contexts/GameContext';
 import XPBar from '../../components/XPBar/XPBar';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import { motion } from 'framer-motion';
@@ -14,10 +15,20 @@ import {
 import styles from './FreePlay.module.css';
 
 const OPERATIONS = [
-  { id: 'addition', label: 'Adição', icon: Plus, color: 'var(--color-kingdom-add)' },
-  { id: 'subtraction', label: 'Subtração', icon: Minus, color: 'var(--color-kingdom-sub)' },
-  { id: 'multiplication', label: 'Multiplicação', icon: X, color: 'var(--color-kingdom-mul)' },
-  { id: 'division', label: 'Divisão', icon: Divide, color: 'var(--color-kingdom-div)' },
+  { id: 'addition', label: 'Adição', icon: Plus, color: 'var(--color-kingdom-add)', unlockCondition: () => true },
+  { id: 'subtraction', label: 'Subtração', icon: Minus, color: 'var(--color-kingdom-sub)', unlockCondition: (progress) => {
+    const additionCompleted = progress.story.completedLevels['addition']?.length || 0;
+    return additionCompleted > 0;
+  }},
+  { id: 'multiplication', label: 'Multiplicação', icon: X, color: 'var(--color-kingdom-mul)', unlockCondition: (progress) => {
+    const additionCompleted = progress.story.completedLevels['addition']?.length || 0;
+    return additionCompleted >= 12;
+  }},
+  { id: 'division', label: 'Divisão', icon: Divide, color: 'var(--color-kingdom-div)', unlockCondition: (progress) => {
+    const additionCompleted = progress.story.completedLevels['addition']?.length || 0;
+    const multiplicationCompleted = progress.story.completedLevels['multiplication']?.length || 0;
+    return additionCompleted >= 18 && multiplicationCompleted >= 5;
+  }},
 ];
 
 const DIFFICULTIES = [
@@ -28,11 +39,25 @@ const DIFFICULTIES = [
 
 export default function FreePlay() {
   const navigate = useNavigate();
+  const { state } = useGame();
   const [selectedOperation, setSelectedOperation] = useState('addition');
   const [selectedDifficulty, setSelectedDifficulty] = useState('easy');
+  const { progress } = state;
+
+  const isOperationUnlocked = (op) => {
+    return op.unlockCondition(progress);
+  };
+
+  const getUnlockText = (op) => {
+    if (op.id === 'addition') return 'pronto';
+    if (op.id === 'subtraction') return 'lvl 1';
+    if (op.id === 'multiplication') return 'lvl 12';
+    if (op.id === 'division') return 'lvl 18+25';
+    return '';
+  };
 
   const handleStartChallenge = () => {
-    navigate(`/challenge/${selectedOperation}?difficulty=${selectedDifficulty}`);
+    navigate(`/challenge/${selectedOperation}?difficulty=${selectedDifficulty}&mode=freeplay`);
   };
 
   const handleBack = () => {
@@ -58,17 +83,21 @@ export default function FreePlay() {
         <div className={styles.operationGrid}>
           {OPERATIONS.map((op) => {
             const Icon = op.icon;
+            const unlocked = isOperationUnlocked(op);
             return (
               <motion.button
                 key={op.id}
-                className={`${styles.operationCard} ${selectedOperation === op.id ? styles.selected : ''}`}
+                className={`${styles.operationCard} ${selectedOperation === op.id ? styles.selected : ''} ${!unlocked ? styles.locked : ''}`}
                 style={{ '--op-color': op.color }}
-                onClick={() => setSelectedOperation(op.id)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                onClick={() => unlocked && setSelectedOperation(op.id)}
+                whileHover={unlocked ? { scale: 1.02 } : {}}
+                whileTap={unlocked ? { scale: 0.98 } : {}}
               >
                 <Icon size={40} weight="fill" className={styles.operationIcon} />
                 <span className={styles.operationLabel}>{op.label}</span>
+                <span className={styles.operationStatus}>
+                  {unlocked ? '✅' : `🔒 ${getUnlockText(op)}`}
+                </span>
               </motion.button>
             );
           })}

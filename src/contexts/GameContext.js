@@ -241,33 +241,43 @@ export function GameProvider({ children }) {
     // Complete a level
     completeLevel: (kingdom, level, stars, xpEarned, hintsUsed) => {
       const progress = { ...state.progress };
+      const storyProgress = { ...progress.story };
+      progress.story = storyProgress;
       
-      // Update completed levels
-      if (!progress.story.completedLevels[kingdom]) {
-        progress.story.completedLevels[kingdom] = [];
+      // Initialize kingdom array if needed
+      if (!storyProgress.completedLevels[kingdom]) {
+        storyProgress.completedLevels[kingdom] = [];
       }
       
-      // Only update if better score
-      const existingIndex = progress.story.completedLevels[kingdom].indexOf(level);
-      if (existingIndex === -1 || stars > existingIndex) {
-        progress.story.completedLevels[kingdom][level] = stars;
+      // Add level to completed array (avoid duplicates)
+      const completedLevels = [...storyProgress.completedLevels[kingdom]];
+      if (!completedLevels.includes(level)) {
+        completedLevels.push(level);
+        storyProgress.completedLevels[kingdom] = completedLevels;
       }
       
       // Update current level if next
-      if (level >= progress.story.currentLevel) {
-        progress.story.currentLevel = Math.min(level + 1, 25);
+      if (level >= storyProgress.currentLevel) {
+        storyProgress.currentLevel = Math.min(level + 1, 25);
       }
       
-      // Unlock next kingdom if all 25 levels complete
-      const completedCount = progress.story.completedLevels[kingdom]?.filter(Boolean).length || 0;
-      if (completedCount >= 25) {
+      // Update currentKingdom when completing all 25 levels of a kingdom
+      if (completedLevels.length >= 25) {
         const kingdomOrder = ['addition', 'subtraction', 'multiplication', 'division'];
         const currentIndex = kingdomOrder.indexOf(kingdom);
+        
+        // Unlock next kingdom
         if (currentIndex < kingdomOrder.length - 1) {
           const nextKingdom = kingdomOrder[currentIndex + 1];
-          if (!progress.story.kingdomsUnlocked.includes(nextKingdom)) {
-            progress.story.kingdomsUnlocked.push(nextKingdom);
+          if (!storyProgress.kingdomsUnlocked.includes(nextKingdom)) {
+            storyProgress.kingdomsUnlocked.push(nextKingdom);
           }
+        }
+        
+        // Advance currentKingdom to next unlocked kingdom
+        if (currentIndex < kingdomOrder.length - 1) {
+          const nextKingdom = kingdomOrder[currentIndex + 1];
+          storyProgress.currentKingdom = nextKingdom;
         }
       }
       

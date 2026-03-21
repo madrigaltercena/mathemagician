@@ -104,6 +104,20 @@
   color: var(--color-text);
 }
 
+.operationStatus {
+  font-size: var(--size-xs);
+  color: var(--color-text-muted);
+}
+
+.operationCard.locked {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.operationCard.locked .operationIcon {
+  color: var(--color-text-muted);
+}
+
 /* Difficulty Grid */
 .difficultyGrid {
   display: flex;

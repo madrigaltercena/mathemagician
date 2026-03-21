@@ -43,6 +43,10 @@
   color: var(--color-primary);
 }
 
+.xpBar {
+  margin-left: auto;
+}
+
 /* Settings List */
 .settingsList {
   display: flex;

@@ -61,13 +61,13 @@ export default function StoryMode() {
   const handleKingdomSelect = (kingdom) => {
     const isUnlocked = progress.story.kingdomsUnlocked.includes(kingdom.id);
     if (isUnlocked) {
-      navigate(`/challenge/${kingdom.id}?difficulty=${getDifficulty()}`);
+      navigate(`/challenge/${kingdom.id}?difficulty=${getDifficulty()}&mode=story`);
     }
   };
 
   const handleContinue = () => {
     const currentKingdom = progress.story.currentKingdom || 'addition';
-    navigate(`/challenge/${currentKingdom}?difficulty=${getDifficulty()}`);
+    navigate(`/challenge/${currentKingdom}?difficulty=${getDifficulty()}&mode=story`);
   };
 
   const handleBack = () => {
@@ -75,7 +75,7 @@ export default function StoryMode() {
   };
 
   const getKingdomProgress = (kingdomId) => {
-    const completed = progress.story.completedLevels[kingdomId]?.filter(Boolean).length || 0;
+    const completed = progress.story.completedLevels[kingdomId]?.length || 0;
     return completed;
   };
 

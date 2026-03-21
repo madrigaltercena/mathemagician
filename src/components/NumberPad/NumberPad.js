@@ -22,6 +22,12 @@ export default function NumberPad({ onKeyPress, disabled = false }) {
     return key;
   };
 
+  const getAriaLabel = (key) => {
+    if (key === 'delete') return 'Apagar';
+    if (key === 'submit') return 'Submeter';
+    return key;
+  };
+
   const isSpecialKey = (key) => key === 'delete' || key === 'submit';
 
   return (
@@ -36,6 +42,7 @@ export default function NumberPad({ onKeyPress, disabled = false }) {
               whileHover={disabled ? {} : { scale: 1.02 }}
               whileTap={disabled ? {} : { scale: 0.95 }}
               transition={{ duration: 0.1 }}
+              aria-label={getAriaLabel(key)}
             >
               {getKeyContent(key)}
             </motion.button>

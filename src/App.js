@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { GameProvider, useGame } from './contexts/GameContext';
 import CharacterCreation from './pages/CharacterCreation/CharacterCreation';
 import Home from './pages/Home/Home';
@@ -7,7 +7,16 @@ import StoryMode from './pages/StoryMode/StoryMode';
 import FreePlay from './pages/FreePlay/FreePlay';
 import Challenge from './pages/Challenge/Challenge';
 import Settings from './pages/Settings/Settings';
+import './App.css';
 import './styles/variables.css';
+
+// Wrapper to determine if we're coming from freeplay or story mode
+function ChallengeWithMode() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const mode = searchParams.get('mode') || 'story';
+  return <Challenge mode={mode} />;
+}
 
 function AppContent() {
   const { state } = useGame();
@@ -43,7 +52,7 @@ function AppContent() {
         {/* Challenge */}
         <Route 
           path="/challenge/:operation" 
-          element={hasCharacter ? <Challenge /> : <Navigate to="/create" replace />} 
+          element={hasCharacter ? <ChallengeWithMode /> : <Navigate to="/create" replace />} 
         />
         
         {/* Settings */}
