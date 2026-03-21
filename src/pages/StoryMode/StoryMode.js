@@ -35,12 +35,12 @@ export default function StoryMode() {
 
   const handleKingdomSelect = (kingdom) => {
     if (!isKingdomUnlocked(kingdom)) return;
-    navigate(`/challenge?mode=story&kingdom=${kingdom.id}`);
+    navigate(`/challenge/${kingdom.id}?mode=story&kingdom=${kingdom.id}`);
   };
 
   const handleContinue = () => {
     const currentKingdomId = progress.story.currentKingdom || 'kingdom1';
-    navigate(`/challenge?mode=story&kingdom=${currentKingdomId}`);
+    navigate(`/challenge/${currentKingdomId}?mode=story&kingdom=${currentKingdomId}`);
   };
 
   // Current kingdom for display

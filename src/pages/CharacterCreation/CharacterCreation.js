@@ -17,13 +17,10 @@ const AVATARS = [
   { id: 'mage6', emoji: '🧌', name: 'Duende', gender: 'boy' },
 ];
 
-const AGES = [6, 7, 8, 9, 10];
-
 export default function CharacterCreation() {
   const { actions } = useGame();
   const [name, setName] = useState('');
   const [avatarIndex, setAvatarIndex] = useState(0);
-  const [age, setAge] = useState(7);
   const [error, setError] = useState('');
 
   const currentAvatar = AVATARS[avatarIndex];
@@ -61,7 +58,6 @@ export default function CharacterCreation() {
     actions.setCharacter({
       name: name.trim(),
       avatar: currentAvatar.id,
-      age: age,
     });
   };
 
@@ -115,22 +111,6 @@ export default function CharacterCreation() {
           autoComplete="off"
         />
         {error && <span className={styles.errorText}>{error}</span>}
-      </section>
-
-      {/* Age Selector */}
-      <section className={styles.ageSection}>
-        <label className={styles.label}>🎂 Quantos anos tens?</label>
-        <div className={styles.ageGrid}>
-          {AGES.map((a) => (
-            <button
-              key={a}
-              className={`${styles.ageButton} ${age === a ? styles.ageButtonActive : ''}`}
-              onClick={() => setAge(a)}
-            >
-              {a}
-            </button>
-          ))}
-        </div>
       </section>
 
       {/* Submit Button */}

@@ -26,7 +26,7 @@ const DIFFICULTIES = [
 export default function Settings() {
   const navigate = useNavigate();
   const { state, actions } = useGame();
-  const { settings, player } = state;
+  const { settings } = state;
 
   const handleBack = () => {
     navigate(-1);
@@ -93,26 +93,6 @@ export default function Settings() {
               <div className={styles.toggleKnob} />
             </div>
           </button>
-        </section>
-
-        {/* Age */}
-        <section className={styles.settingSection}>
-          <h3 className={styles.sectionTitle}>🎂 Idade</h3>
-          <div className={styles.infoRow}>
-            <span>{player.age} anos</span>
-            <span className={styles.infoHint}>(muda a dificuldade)</span>
-          </div>
-          <div className={styles.ageButtons}>
-            {[6, 7, 8, 9, 10].map((age) => (
-              <button
-                key={age}
-                className={`${styles.ageButton} ${player.age === age ? styles.active : ''}`}
-                onClick={() => actions.updatePlayer({ age })}
-              >
-                {age}
-              </button>
-            ))}
-          </div>
         </section>
 
         {/* Difficulty */}

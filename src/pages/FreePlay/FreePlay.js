@@ -38,7 +38,7 @@ export default function FreePlay() {
   };
 
   const handleStartChallenge = () => {
-    navigate(`/challenge?mode=freeplay&operation=${selectedOperation}`);
+    navigate(`/challenge/${selectedOperation}?mode=freeplay`);
   };
 
   const handleBack = () => {
