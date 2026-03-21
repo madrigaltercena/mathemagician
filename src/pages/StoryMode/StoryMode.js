@@ -19,25 +19,12 @@ const KINGDOMS = [
   { id: 'kingdom8', name: 'Reino dos Mágicos', icon: '💜', operation: 'O Grande Des Finale', color: 'var(--color-kingdom-div)', unlockLevel: 15, totalLevels: 2, year: 4 },
 ];
 
-// Which level completes each kingdom
-const KINGDOM_COMPLETION = { 2: 1, 4: 2, 6: 3, 8: 4, 10: 5, 12: 6, 14: 7, 16: 8 };
-
-// Half-year milestones (level 2, 4, 6, 8, 10, 12, 14, 16)
-const HALF_YEAR_LEVELS = [2, 4, 6, 8, 10, 12, 14, 16];
-
-// Full year milestones (level 4, 8, 12, 16)
-const YEAR_COMPLETION_LEVELS = [4, 8, 12, 16];
-
-// Year names for messages
-const YEAR_NAMES = { 1: '1º ano', 2: '2º ano', 3: '3º ano', 4: '4º ano' };
-
 export default function StoryMode() {
   const navigate = useNavigate();
   const { state } = useGame();
-  const { progress, settings, player } = state;
+  const { progress } = state;
 
   const getKingdomProgress = (kingdomId) => {
-    const kingdom = KINGDOMS.find(k => k.id === kingdomId);
     const completed = progress.story.completedLevels[kingdomId]?.length || 0;
     return completed;
   };
@@ -54,13 +41,6 @@ export default function StoryMode() {
   const handleContinue = () => {
     const currentKingdomId = progress.story.currentKingdom || 'kingdom1';
     navigate(`/challenge/${currentKingdomId}?mode=story`);
-  };
-
-  // Get year milestone type for current level
-  const getYearMilestone = (level) => {
-    if (YEAR_COMPLETION_LEVELS.includes(level)) return 'year_complete';
-    if (HALF_YEAR_LEVELS.includes(level)) return 'half_year';
-    return null;
   };
 
   // Current kingdom for display

@@ -39,7 +39,7 @@ const KINGDOM_NAMES = {
   kingdom8: 'Reino dos Mágicos',
 };
 
-export default function Challenge({ operation = 'addition', level = 1, mode = 'story', onBack, onComplete }) {
+export default function Challenge({ onBack, onComplete }) {
   const navigate = useNavigate();
   const { state, actions } = useGame();
   const { settings, player } = state;
@@ -49,7 +49,7 @@ export default function Challenge({ operation = 'addition', level = 1, mode = 's
   const currentLevel = state.progress.story.currentLevel;
   
   const [questions, setQuestions] = useState(() => 
-    generateQuestions(currentKingdom || operation, currentLevel, 5)
+    generateQuestions(currentKingdom || 'kingdom1', currentLevel, 5)
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -66,7 +66,7 @@ export default function Challenge({ operation = 'addition', level = 1, mode = 's
   
   // Regenerate questions when level changes (level up, navigate back from menu)
   useEffect(() => {
-    setQuestions(generateQuestions(currentKingdom || operation, currentLevel, 5));
+    setQuestions(generateQuestions(currentKingdom || 'kingdom1', currentLevel, 5));
     setCurrentIndex(0);
     setUserAnswer('');
     setHintsRemaining(3);
@@ -129,7 +129,7 @@ export default function Challenge({ operation = 'addition', level = 1, mode = 's
     const xpEarned = (stars * 10) - (totalHintsUsed * 3);
     
     const completedLevel = state.progress.story.currentLevel;
-    actions.completeLevel(operation, completedLevel, stars, Math.max(0, xpEarned), totalHintsUsed);
+    actions.completeLevel(currentKingdom, completedLevel, stars, Math.max(0, xpEarned), totalHintsUsed);
     
     // Show milestone modal at half-year (2,4,6,8,10,12,14) and full-year (4,8,12,16) — we show at all half-year levels
     const HALF_YEAR_LEVELS = [2, 4, 6, 8, 10, 12, 14, 16];
@@ -207,7 +207,7 @@ export default function Challenge({ operation = 'addition', level = 1, mode = 's
       actions.updateProgress(currentProgress);
     }
     
-    setQuestions(generateQuestions(currentKingdom || operation, state.progress.story.currentLevel, 5));
+    setQuestions(generateQuestions(currentKingdom || 'kingdom1', state.progress.story.currentLevel, 5));
     setCurrentIndex(0);
     setUserAnswer('');
     setHintsRemaining(3);
@@ -222,7 +222,7 @@ export default function Challenge({ operation = 'addition', level = 1, mode = 's
     const currentKingdom = state.progress.story.currentKingdom;
     
     // Generate new questions for next level using correct operation and level
-    setQuestions(generateQuestions(currentKingdom || operation, state.progress.story.currentLevel, 5));
+    setQuestions(generateQuestions(currentKingdom || 'kingdom1', state.progress.story.currentLevel, 5));
     setCurrentIndex(0);
     setUserAnswer('');
     setHintsRemaining(3);
@@ -357,6 +357,7 @@ export default function Challenge({ operation = 'addition', level = 1, mode = 's
         level={state.progress.story.currentLevel}
         onContinue={handleAgeContinue}
         onRestart={handleAgeRestart}
+        onHome={onBack}
       />
     </div>
   );

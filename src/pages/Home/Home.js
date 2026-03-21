@@ -12,31 +12,29 @@ import {
 } from '@phosphor-icons/react';
 import styles from './Home.module.css';
 
-const KINGDOM_ICONS = {
-  addition: '🟡',
-  subtraction: '🔵',
-  multiplication: '🔴',
-  division: '🟢',
-};
-
-const KINGDOM_NAMES = {
-  addition: 'Reino Dourado',
-  subtraction: 'Cavernas de Cristal',
-  multiplication: 'Floresta de Fogo',
-  division: 'Montanhas Esmeralda',
-};
+// 8 kingdoms imported from StoryMode (2 levels each)
+const KINGDOMS = [
+  { id: 'kingdom1', name: 'Reino dos Números Pequenos', icon: '🟡', totalLevels: 2, unlockLevel: 1 },
+  { id: 'kingdom2', name: 'Reino dos Números Crescidos', icon: '🟠', totalLevels: 2, unlockLevel: 3 },
+  { id: 'kingdom3', name: 'Reino das Tabuadas', icon: '🔵', totalLevels: 2, unlockLevel: 5 },
+  { id: 'kingdom4', name: 'Reino dos Grandes Números', icon: '🔷', totalLevels: 2, unlockLevel: 7 },
+  { id: 'kingdom5', name: 'Reino da Multiplicação', icon: '🔴', totalLevels: 2, unlockLevel: 9 },
+  { id: 'kingdom6', name: 'Reino da Divisão', icon: '🔺', totalLevels: 2, unlockLevel: 11 },
+  { id: 'kingdom7', name: 'Reino dos Desafios Grandes', icon: '🟢', totalLevels: 2, unlockLevel: 13 },
+  { id: 'kingdom8', name: 'Reino dos Mágicos', icon: '💜', totalLevels: 2, unlockLevel: 15 },
+];
 
 export default function Home() {
   const { state } = useGame();
   const navigate = useNavigate();
   const { player, progress } = state;
   
-  const kingdoms = ['addition', 'subtraction', 'multiplication', 'division'];
-  
-  const getKingdomProgress = (kingdom) => {
-    const completed = progress.story.completedLevels[kingdom]?.length || 0;
-    const isUnlocked = progress.story.kingdomsUnlocked.includes(kingdom);
-    return { completed, isUnlocked, total: 25 };
+  const getKingdomProgress = (kingdomId) => {
+    const kingdom = KINGDOMS.find(k => k.id === kingdomId);
+    if (!kingdom) return { completed: 0, isUnlocked: false, total: kingdom?.totalLevels || 2 };
+    const completed = progress.story.completedLevels[kingdomId]?.length || 0;
+    const isUnlocked = progress.story.currentLevel >= kingdom.unlockLevel;
+    return { completed, isUnlocked, total: kingdom.totalLevels };
   };
 
   const handlePlayStory = () => {
@@ -115,27 +113,27 @@ export default function Home() {
       
       {/* Kingdom Progress */}
       <section className={styles.kingdomsSection}>
-        <h2 className={styles.sectionTitle}>Os 4 Reinos</h2>
+        <h2 className={styles.sectionTitle}>Os 8 Reinos</h2>
         <div className={styles.kingdomsGrid}>
-          {kingdoms.map((kingdom, index) => {
-            const { completed, isUnlocked, total } = getKingdomProgress(kingdom);
+          {KINGDOMS.map((kingdom, index) => {
+            const { completed, isUnlocked, total } = getKingdomProgress(kingdom.id);
             const percentage = Math.round((completed / total) * 100);
-            const isCompleted = completed >= 25;
+            const isCompleted = completed >= total;
             
             return (
               <motion.div
-                key={kingdom}
+                key={kingdom.id}
                 className={`${styles.kingdomCard} ${!isUnlocked ? styles.locked : ''} ${isCompleted ? styles.completed : ''}`}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.05 }}
                 onClick={() => isUnlocked && navigate('/story')}
               >
                 <div className={styles.kingdomIcon}>
-                  {KINGDOM_ICONS[kingdom]}
+                  {isUnlocked ? kingdom.icon : '🔒'}
                 </div>
                 <div className={styles.kingdomInfo}>
-                  <span className={styles.kingdomName}>{KINGDOM_NAMES[kingdom]}</span>
+                  <span className={styles.kingdomName}>{kingdom.name}</span>
                   <div className={styles.kingdomProgress}>
                     <div className={styles.progressBar}>
                       <div 
