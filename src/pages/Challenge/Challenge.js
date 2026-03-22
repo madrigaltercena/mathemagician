@@ -9,6 +9,7 @@ import HintModal from '../../components/HintModal/HintModal';
 import ResultModal from '../../components/ResultModal/ResultModal';
 import AgeCompletionModal from '../../components/AgeCompletionModal/AgeCompletionModal';
 import { generateQuestions, generateHint, calculateStars } from '../../utils/questions';
+import { useChallengeProgress } from '../../hooks/useChallengeProgress';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   SpeakerHigh,
@@ -96,16 +97,25 @@ export default function Challenge({ onBack, onComplete }) {
   // Number of questions: 10 for freeplay, 5 for story
   const questionCount = isFreePlay ? 10 : 5;
 
-  const [questions, setQuestions] = useState(() =>
-    generateQuestions(currentKingdom, currentLevel, questionCount, currentOpsArray)
+  // Hook for progress persistence (Problem #3)
+  const { savedProgress, saveProgress, clearProgress } = useChallengeProgress(
+    currentKingdom, currentLevel, !isFreePlay && !isReviewMode, isReviewMode
   );
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Restore saved progress on mount — only on very first render (savedProgress is null on re-renders)
+  const [questions, setQuestions] = useState(() => {
+    if (savedProgress) {
+      return savedProgress.questions;
+    }
+    return generateQuestions(currentKingdom, currentLevel, questionCount, currentOpsArray);
+  });
+  const [currentIndex, setCurrentIndex] = useState(() => savedProgress ? savedProgress.questionIndex : 0);
   const [userAnswer, setUserAnswer] = useState('');
-  const [hintsRemaining, setHintsRemaining] = useState(3);
+  const [hintsRemaining, setHintsRemaining] = useState(() => savedProgress ? Math.max(0, 3 - savedProgress.hintsUsed) : 3);
   const [showHint, setShowHint] = useState(false);
   const [currentHint, setCurrentHint] = useState([]);
   const [hintStep, setHintStep] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [correctCount, setCorrectCount] = useState(() => savedProgress ? savedProgress.correctCount : 0);
   const [showResult, setShowResult] = useState(false);
   const [showAgeCompletion, setShowAgeCompletion] = useState(false);
   const [lastCompletedLevel, setLastCompletedLevel] = useState(null); // BUG #1 fix: pass completed level to milestone modal
@@ -113,9 +123,23 @@ export default function Challenge({ onBack, onComplete }) {
   const [shake, setShake] = useState(false);
   const [hintsUsedPerQuestion, setHintsUsedPerQuestion] = useState({});
 
-  // Regenerate questions when kingdom or level changes
-  // BUG #3 FIX: added urlKingdom to dependency array so questions regenerate when URL kingdom changes
+  // Auto-save challenge progress on every state change (story mode only)
   useEffect(() => {
+    const q = questions[currentIndex];
+    if (!isFreePlay && !isReviewMode && q && questions.length > 0) {
+      saveProgress({
+        questionIndex: currentIndex,
+        questions,
+        correctCount,
+        hintsUsed: Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0),
+      });
+    }
+  }, [currentIndex, questions, correctCount, hintsUsedPerQuestion, isFreePlay, isReviewMode, questions.length, saveProgress]);
+
+  // Regenerate questions when kingdom or level changes (only when NOT restoring saved progress)
+  useEffect(() => {
+    // Skip if we are restoring from saved progress
+    if (savedProgress && questions.length > 0) return;
     setQuestions(generateQuestions(currentKingdom, currentLevel, questionCount, currentOpsArray));
     setCurrentIndex(0);
     setUserAnswer('');
@@ -207,6 +231,9 @@ export default function Challenge({ onBack, onComplete }) {
     } else {
       setShowResult(true);
     }
+
+    // Problem #3: clear saved progress on level complete
+    clearProgress();
   };
 
   const handleUseHint = () => {
@@ -238,10 +265,19 @@ export default function Challenge({ onBack, onComplete }) {
   };
 
   const handleResultClose = () => {
+    // Auto-save one last time before navigating away, then go to StoryMode
+    if (!isFreePlay && !isReviewMode) {
+      saveProgress({
+        questionIndex: currentIndex,
+        questions,
+        correctCount,
+        hintsUsed: Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0),
+      });
+    }
     if (onComplete) {
       onComplete();
-    } else if (onBack) {
-      onBack();
+    } else {
+      navigate('/story');
     }
   };
 
@@ -264,13 +300,16 @@ export default function Challenge({ onBack, onComplete }) {
   };
 
   const handleRetry = () => {
+    // Problem #3: clear saved progress so re-entry starts fresh
+    clearProgress();
     // Decrement currentLevel before retry so user replays the same level
     const currentProgress = { ...state.progress };
     if (currentProgress.story.currentLevel > 1) {
       currentProgress.story.currentLevel -= 1;
       actions.updateProgress(currentProgress);
     }
-    // Questions will be regenerated via useEffect when state changes
+    // Navigate to StoryMode so user re-enters the challenge fresh
+    navigate('/story');
   };
 
   const handleNext = () => {

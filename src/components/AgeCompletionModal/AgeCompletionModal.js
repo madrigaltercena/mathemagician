@@ -31,7 +31,7 @@ export default function AgeCompletionModal({ isOpen, level, streak = 0, onContin
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}>
 
             <div className={styles.trophyIcon}>
-              {level === 16 ? <Trophy size={64} weight="fill" /> : <Star size={64} weight="fill" />}
+              {level === 16 ? <Trophy size={48} weight="fill" /> : <Star size={48} weight="fill" />}
             </div>
 
             <h1 className={styles.title}>{msg.title}</h1>
