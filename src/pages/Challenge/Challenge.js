@@ -39,19 +39,20 @@ const KINGDOM_NAMES = {
   kingdom8: 'Reino dos Mágicos',
 };
 
-// BUG #2 FIX: kingdom thresholds — level 1-2 → kingdom1, 3-4 → kingdom2, etc.
+// Kingdom thresholds — level N belongs to kingdom at index floor((N-1)/2)
+// level 1-2 → kingdom1 (index 0, threshold 0), level 3-4 → kingdom2 (index 1, threshold 2), etc.
 const KINGDOM_ORDER = ['kingdom1', 'kingdom2', 'kingdom3', 'kingdom4', 'kingdom5', 'kingdom6', 'kingdom7', 'kingdom8'];
-const KINGDOM_THRESHOLDS = [1, 3, 5, 7, 9, 11, 13, 15];
+const KINGDOM_THRESHOLDS = [0, 2, 4, 6, 8, 10, 12, 14];
 const getKingdomForLevel = (level) => {
   for (let i = KINGDOM_ORDER.length - 1; i >= 0; i--) {
-    if (level >= KINGDOM_THRESHOLDS[i]) return KINGDOM_ORDER[i];
+    if (level > KINGDOM_THRESHOLDS[i]) return KINGDOM_ORDER[i];
   }
   return 'kingdom1';
 };
-// BUG #3 FIX: get starting level for a kingdom (used in review mode)
+// Get the starting level for a kingdom (used in review mode)
 const getStartingLevel = (kingdom) => {
   const idx = KINGDOM_ORDER.indexOf(kingdom);
-  return idx >= 0 ? KINGDOM_THRESHOLDS[idx] : 1;
+  return idx >= 0 ? KINGDOM_THRESHOLDS[idx] + 1 : 1;
 };
 
 export default function Challenge({ onBack, onComplete }) {
@@ -340,7 +341,7 @@ export default function Challenge({ onBack, onComplete }) {
           <div className={styles.questionType}>
             {isFreePlay
               ? (currentOpsArray && currentOpsArray.length > 0 ? currentOpsArray.map(op => op === 'multiplication' ? '×' : op === 'division' ? '÷' : op === 'subtraction' ? '−' : '+').join(' ') : '+')
-              : OPERATION_LABELS[state.progress.story.currentKingdom]
+              : OPERATION_LABELS[labelKingdom]
             }
           </div>
 
