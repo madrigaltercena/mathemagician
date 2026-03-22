@@ -424,7 +424,7 @@ export default function Challenge({ onBack, onComplete }) {
           streak={player.currentStreak}
           onContinue={handleAgeContinue}
           onRestart={handleAgeRestart}
-          onHome={onBack}
+          onHome={() => navigate('/')}
         />
       )}
     </div>

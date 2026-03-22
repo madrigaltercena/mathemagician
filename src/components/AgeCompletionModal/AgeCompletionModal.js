@@ -64,7 +64,7 @@ export default function AgeCompletionModal({ isOpen, level, streak = 0, onContin
                 </motion.button>
               )}
 
-              <motion.button className={styles.homeButton} onClick={() => navigate('/')}
+              <motion.button className={styles.homeButton} onClick={onHome}
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <House size={20} weight="fill" />
                 <span>Menu Principal</span>
