@@ -7,9 +7,15 @@ import HintButton from '../../components/HintButton/HintButton';
 import ProgressDots from '../../components/ProgressDots/ProgressDots';
 import HintModal from '../../components/HintModal/HintModal';
 import ResultModal from '../../components/ResultModal/ResultModal';
-import AgeCompletionModal from '../../components/AgeCompletionModal/AgeCompletionModal';
+import RewardModal from '../../components/RewardModal/RewardModal';
 import { generateQuestions, generateHint, calculateStars } from '../../utils/questions';
 import { useChallengeProgress } from '../../hooks/useChallengeProgress';
+import { useGamification } from '../../hooks/useGamification';
+import {
+  KINGDOM_DISPLAY_NAMES,
+  REALM_DATA,
+  REWARD_TYPES,
+} from '../../utils/curriculumMap';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   SpeakerHigh,
@@ -29,16 +35,7 @@ const OPERATION_LABELS = {
   kingdom8: 'O Grande Des Finale',
 };
 
-const KINGDOM_NAMES = {
-  kingdom1: 'Reino dos Números Pequenos',
-  kingdom2: 'Reino dos Números Crescidos',
-  kingdom3: 'Reino das Tabuadas',
-  kingdom4: 'Reino dos Grandes Números',
-  kingdom5: 'Reino da Multiplicação',
-  kingdom6: 'Reino da Divisão',
-  kingdom7: 'Reino dos Desafios Grandes',
-  kingdom8: 'Reino dos Mágicos',
-};
+const KINGDOM_NAMES = KINGDOM_DISPLAY_NAMES;
 
 // Kingdom thresholds — level N belongs to kingdom at index floor((N-1)/2)
 // level 1-2 → kingdom1 (index 0, threshold 0), level 3-4 → kingdom2 (index 1, threshold 2), etc.
@@ -68,6 +65,7 @@ export default function Challenge({ onBack, onComplete }) {
   const urlOpsParam = searchParams.get('ops'); // comma-separated ops for freeplay
   const urlReview = searchParams.get('review'); // 'true' for review mode
   const urlKingdom = searchParams.get('kingdom'); // kingdom id (story mode via query string)
+  const urlLevel = parseInt(searchParams.get('level'), 10) || null; // explicit level from RewardModal navigation
 
   const isFreePlay = urlMode === 'freeplay';
   const isReviewMode = urlReview === 'true';
@@ -87,9 +85,10 @@ export default function Challenge({ onBack, onComplete }) {
   // Detect replay: urlKingdom is set and differs from the global story kingdom
   const isKingdomReplay = urlKingdom && urlKingdom !== storyKingdom;
   // BUG #3 FIX: in review mode or replay, use the kingdom's starting level (not stale story state)
-  const currentLevel = isReviewMode || isKingdomReplay
+  // urlLevel takes priority (set by RewardModal when navigating to next level)
+  const currentLevel = urlLevel || (isReviewMode || isKingdomReplay
     ? getStartingLevel(currentKingdom)
-    : storyLevel;
+    : storyLevel);
   // In freeplay, parse ops array from URL; in story, use null (level config)
   const currentOpsArray = isFreePlay && urlOpsParam
     ? urlOpsParam.split(',').filter(Boolean)
@@ -101,6 +100,9 @@ export default function Challenge({ onBack, onComplete }) {
   const { savedProgress, saveProgress, clearProgress } = useChallengeProgress(
     currentKingdom, currentLevel, !isFreePlay && !isReviewMode, isReviewMode
   );
+
+  // Priority 1: Gamification hook
+  const gamification = useGamification();
 
   // Restore saved progress on mount — only on very first render (savedProgress is null on re-renders)
   const [questions, setQuestions] = useState(() => {
@@ -117,11 +119,21 @@ export default function Challenge({ onBack, onComplete }) {
   const [hintStep, setHintStep] = useState(0);
   const [correctCount, setCorrectCount] = useState(() => savedProgress ? savedProgress.correctCount : 0);
   const [showResult, setShowResult] = useState(false);
-  const [showAgeCompletion, setShowAgeCompletion] = useState(false);
   const [lastCompletedLevel, setLastCompletedLevel] = useState(null); // BUG #1 fix: pass completed level to milestone modal
   const [answerState, setAnswerState] = useState(null); // 'correct', 'wrong', null
   const [shake, setShake] = useState(false);
   const [hintsUsedPerQuestion, setHintsUsedPerQuestion] = useState({});
+
+  // Priority 1: Reward modal state
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [rewardModalConfig, setRewardModalConfig] = useState({
+    rewardType: REWARD_TYPES.LEVEL_COMPLETE,
+    item: null,
+    realmName: '',
+    yearNumber: 1,
+    yearName: '',
+    streakCount: 0,
+  });
 
   // Auto-save challenge progress on every state change (story mode only)
   useEffect(() => {
@@ -138,7 +150,7 @@ export default function Challenge({ onBack, onComplete }) {
 
   // Regenerate questions when kingdom or level changes (only when NOT restoring saved progress)
   useEffect(() => {
-    // Skip if we are restoring from saved progress
+    // Skip if we are restoring from saved progress AND we have questions for this exact level
     if (savedProgress && questions.length > 0) return;
     setQuestions(generateQuestions(currentKingdom, currentLevel, questionCount, currentOpsArray));
     setCurrentIndex(0);
@@ -149,7 +161,7 @@ export default function Challenge({ onBack, onComplete }) {
     setShowResult(false);
     setAnswerState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentKingdom, currentLevel, questionCount, urlKingdom]);
+  }, [currentKingdom, currentLevel, questionCount, urlKingdom, savedProgress]);
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
@@ -172,11 +184,22 @@ export default function Challenge({ onBack, onComplete }) {
     if (correct) {
       setAnswerState('correct');
       setCorrectCount(prev => prev + 1);
+
+      // Priority 1: Update combo streak
+      gamification.incrementStreak();
+
+      // Priority 1: Award coins in freeplay
+      if (isFreePlay) {
+        gamification.addCoins(1);
+      }
+
       setTimeout(() => {
         setAnswerState(null);
         nextQuestion();
       }, 1200);
     } else {
+      // Priority 1: Reset streak on wrong answer
+      gamification.resetStreak();
       setAnswerState('wrong');
       setShake(true);
       setTimeout(() => {
@@ -210,7 +233,6 @@ export default function Challenge({ onBack, onComplete }) {
 
     if (!isPassive) {
       actions.completeLevel(currentKingdom, completedLevel, stars, Math.max(0, xpEarned), totalHintsUsed);
-      // BUG #4 FIX: also call updateStreak for story mode (completeLevel already calls it, but call again explicitly for safety)
       actions.updateStreak();
     } else {
       // In freeplay/review: just add XP (freeplay) or nothing (review), don't advance story
@@ -220,17 +242,34 @@ export default function Challenge({ onBack, onComplete }) {
       }
     }
 
-    // BUG #1 FIX: set lastCompletedLevel so AgeCompletionModal receives the correct level
+    // Priority 1: Process gamification rewards
+    const streakCount = gamification.getStreakCount();
+    let rewardResult = { rewardType: REWARD_TYPES.LEVEL_COMPLETE, item: null, creature: null, reward: null };
+
+    if (!isPassive) {
+      rewardResult = gamification.processLevelComplete(completedLevel, currentKingdom);
+    }
+
+    // Derive year from kingdom index (kingdoms 0-1 = year 1, 2-3 = year 2, etc.)
+    const kingdomIdx = Math.floor((completedLevel - 1) / 2); // 0-based kingdom index
+    const yearNumber = Math.floor(kingdomIdx / 2) + 1;
+    const yearNames = { 1: '1.º Ano', 2: '2.º Ano', 3: '3.º Ano', 4: '4.º Ano' };
+    const realm = REALM_DATA[currentKingdom];
+
+    // Set the reward modal config
+    setRewardModalConfig({
+      rewardType: rewardResult.rewardType,
+      item: rewardResult.item,
+      realmName: realm?.name || currentKingdom,
+      yearNumber,
+      yearName: yearNames[yearNumber] || `${yearNumber}.º Ano`,
+      streakCount,
+    });
     setLastCompletedLevel(completedLevel);
 
-    // Show milestone modal at half-year levels (story mode only, not review)
-    const HALF_YEAR_LEVELS = [2, 4, 6, 8, 10, 12, 14, 16];
-    if (!isPassive && HALF_YEAR_LEVELS.includes(completedLevel)) {
-      setShowAgeCompletion(true);
-      setShowResult(false);
-    } else {
-      setShowResult(true);
-    }
+    // Priority 1: Show RewardModal for all completions (replaces AgeCompletionModal)
+    setShowRewardModal(true);
+    setShowResult(false);
 
     // Problem #3: clear saved progress on level complete
     clearProgress();
@@ -281,22 +320,23 @@ export default function Challenge({ onBack, onComplete }) {
     }
   };
 
-  const handleAgeContinue = () => {
-    setShowAgeCompletion(false);
+  // Priority 1: RewardModal handlers
+  const handleRewardContinue = () => {
+    setShowRewardModal(false);
     setShowResult(false);
-    // Derive next kingdom from the COMPLETED level, not from state (which is stale due to React batching)
+    // Derive next level from the COMPLETED level
     const nextLevel = (lastCompletedLevel || state.progress.story.currentLevel) + 1;
     const nextKingdom = getKingdomForLevel(nextLevel);
-    navigate(`/challenge/${nextKingdom}?mode=story&kingdom=${nextKingdom}`);
+    // Clear localStorage before navigating so the next Challenge mount starts fresh
+    clearProgress();
+    // Force a full remount of Challenge with a hard navigation
+    window.location.href = `/challenge/${nextKingdom}?mode=story&kingdom=${nextKingdom}&level=${nextLevel}`;
   };
 
-  const handleAgeRestart = () => {
-    setShowAgeCompletion(false);
+  const handleRewardClose = () => {
+    setShowRewardModal(false);
     setShowResult(false);
-    actions.resetProgress();
-    if (onBack) {
-      onBack();
-    }
+    navigate('/story');
   };
 
   const handleRetry = () => {
@@ -446,7 +486,7 @@ export default function Challenge({ onBack, onComplete }) {
       {/* Result Modal */}
       {/* BUG #1 FIX: onHome goes to /freeplay in freeplay mode, otherwise onBack */}
       <ResultModal
-        isOpen={showResult && !showAgeCompletion}
+        isOpen={showResult && !showRewardModal}
         correct={correctCount}
         total={questions.length}
         xpEarned={Math.max(0, (calculateStars(correctCount, questions.length) * 10) - (Object.values(hintsUsedPerQuestion).reduce((sum, used) => sum + used, 0) * 3))}
@@ -458,17 +498,18 @@ export default function Challenge({ onBack, onComplete }) {
         onHome={isFreePlay ? handleFreeplayHome : onBack}
       />
 
-      {/* Age Completion Modal */}
-      {!isFreePlay && (
-        <AgeCompletionModal
-          isOpen={showAgeCompletion}
-          level={lastCompletedLevel || state.progress.story.currentLevel}
-          streak={player.currentStreak}
-          onContinue={handleAgeContinue}
-          onRestart={handleAgeRestart}
-          onHome={() => navigate('/')}
-        />
-      )}
+      {/* Priority 1: Reward Modal — replaces AgeCompletionModal */}
+      <RewardModal
+        isOpen={showRewardModal}
+        rewardType={rewardModalConfig.rewardType}
+        item={rewardModalConfig.item}
+        realmName={rewardModalConfig.realmName}
+        yearNumber={rewardModalConfig.yearNumber}
+        yearName={rewardModalConfig.yearName}
+        streakCount={rewardModalConfig.streakCount}
+        onContinue={handleRewardContinue}
+        onHome={handleRewardClose}
+      />
     </div>
   );
 }
