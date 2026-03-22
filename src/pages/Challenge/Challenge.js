@@ -247,10 +247,9 @@ export default function Challenge({ onBack, onComplete }) {
   const handleAgeContinue = () => {
     setShowAgeCompletion(false);
     setShowResult(false);
-    // Navigate directly to the next level's challenge (skip round-trip to StoryMode)
-    // currentKingdom from state is NOW the new kingdom (updated by completeLevel)
-    const nextKingdom = state.progress.story.currentKingdom;
-    // Navigate directly to the next level's challenge
+    // Derive next kingdom from the COMPLETED level, not from state (which is stale due to React batching)
+    const nextLevel = (lastCompletedLevel || state.progress.story.currentLevel) + 1;
+    const nextKingdom = getKingdomForLevel(nextLevel);
     navigate(`/challenge/${nextKingdom}?mode=story&kingdom=${nextKingdom}`);
   };
 
