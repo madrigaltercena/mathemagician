@@ -15,7 +15,7 @@ const HALF_YEAR = {
   16: { year: 4, title: '🏆 Fantástico! Completaste o 4º ano!', subtitle: 'Tu és um verdadeiro Mago da Matemática!', cta: 'Jogar novamente' },
 };
 
-export default function AgeCompletionModal({ isOpen, level, onContinue, onRestart, onHome }) {
+export default function AgeCompletionModal({ isOpen, level, streak = 0, onContinue, onRestart, onHome }) {
   const msg = HALF_YEAR[level];
   if (!msg) return null;
 
@@ -41,6 +41,12 @@ export default function AgeCompletionModal({ isOpen, level, onContinue, onRestar
               <span className={styles.yearLabel}>Ano:</span>
               <span className={styles.yearValue}>{msg.year}º ano</span>
             </div>
+
+            {streak > 0 && (
+              <div className={styles.streakBadge}>
+                <span>🔥 Streak: {streak}</span>
+              </div>
+            )}
 
             <div className={styles.actions}>
               {level < 16 ? (

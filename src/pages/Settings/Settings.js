@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGame } from '../../contexts/GameContext';
 import { useNavigate } from 'react-router-dom';
+import { VERSION } from '../../version';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import XPBar from '../../components/XPBar/XPBar';
 import { motion } from 'framer-motion';
@@ -154,6 +155,9 @@ export default function Settings() {
           </div>
         </section>
       </div>
+
+      {/* Version */}
+      <p style={{textAlign: 'center', opacity: 0.5, fontSize: '0.8rem', paddingBottom: '5rem'}}>Versão {VERSION}</p>
 
       <BottomNav active="profile" />
     </div>

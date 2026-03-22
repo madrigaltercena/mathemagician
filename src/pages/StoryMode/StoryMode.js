@@ -35,7 +35,18 @@ export default function StoryMode() {
 
   const handleKingdomSelect = (kingdom) => {
     if (!isKingdomUnlocked(kingdom)) return;
-    navigate(`/challenge/${kingdom.id}?mode=story&kingdom=${kingdom.id}`);
+    const completed = getKingdomProgress(kingdom.id) >= kingdom.totalLevels;
+    const isCurrent = progress.story.currentKingdom === kingdom.id;
+
+    if (isCurrent) {
+      // Currently playing kingdom — normal flow, no review flag
+      navigate(`/challenge/${kingdom.id}?mode=story&kingdom=${kingdom.id}`);
+    } else if (completed) {
+      // Past completed kingdom — review mode, no XP/progress accumulation
+      navigate(`/challenge/${kingdom.id}?mode=story&kingdom=${kingdom.id}&review=true`);
+    } else {
+      navigate(`/challenge/${kingdom.id}?mode=story&kingdom=${kingdom.id}`);
+    }
   };
 
   const handleContinue = () => {
@@ -46,6 +57,11 @@ export default function StoryMode() {
   // Current kingdom for display
   const currentKingdomId = progress.story.currentKingdom || 'kingdom1';
   const currentKingdomData = KINGDOMS.find(k => k.id === currentKingdomId) || KINGDOMS[0];
+
+  // BUG #2 FIX: determine button text based on whether user has started this kingdom
+  const completedInCurrentKingdom = getKingdomProgress(currentKingdomId);
+  const hasStarted = completedInCurrentKingdom > 0 || progress.story.currentLevel > 1;
+  const continueButtonText = hasStarted ? 'CONTINUAR AVENTURA' : 'COMEÇAR AVENTURA';
 
   return (
     <div className={styles.container}>
@@ -64,15 +80,18 @@ export default function StoryMode() {
           const completed = getKingdomProgress(kingdom.id) >= kingdom.totalLevels;
           const isActive = unlocked && !completed;
           const isPast = completed;
+          const isCurrent = progress.story.currentKingdom === kingdom.id;
+          const isReviewable = isPast && !isCurrent;
 
           return (
             <React.Fragment key={kingdom.id}>
               <div
-                className={`${styles.kingdomNode} ${!unlocked ? styles.locked : ''} ${isActive ? styles.active : ''} ${isPast ? styles.completed : ''}`}
+                className={`${styles.kingdomNode} ${!unlocked ? styles.locked : ''} ${isActive ? styles.active : ''} ${isPast ? styles.completed : ''} ${isReviewable ? styles.reviewMode : ''}`}
                 onClick={() => handleKingdomSelect(kingdom)}
               >
                 <div className={styles.kingdomIcon}>{unlocked ? kingdom.icon : '🔒'}</div>
                 <span className={styles.kingdomName}>{kingdom.name}</span>
+                {isReviewable && <span className={styles.reviewBadge}>🔄 Revisão</span>}
               </div>
               {index < KINGDOMS.length - 1 && (
                 <div className={`${styles.connector} ${unlocked ? styles.connectorActive : ''}`}>
@@ -113,7 +132,7 @@ export default function StoryMode() {
       {/* Continue Button */}
       <motion.button className={styles.continueButton} onClick={handleContinue} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <Lightning size={24} weight="fill" />
-        <span>CONTINUAR AVENTURA</span>
+        <span>{continueButtonText}</span>
       </motion.button>
 
       <BottomNav active="play" />

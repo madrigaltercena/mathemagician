@@ -83,25 +83,29 @@ export default function ResultModal({
             </div>
 
             <div className={styles.actions}>
-              <motion.button 
-                className={styles.retryButton}
-                onClick={onRetry}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <ArrowClockwise size={20} weight="bold" />
-                <span>REPETIR</span>
-              </motion.button>
-              
-              <motion.button 
-                className={styles.nextButton}
-                onClick={onNext}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span>SEGUINTE</span>
-                <ArrowRight size={20} weight="bold" />
-              </motion.button>
+              {onRetry && (
+                <motion.button
+                  className={styles.retryButton}
+                  onClick={onRetry}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <ArrowClockwise size={20} weight="bold" />
+                  <span>REPETIR</span>
+                </motion.button>
+              )}
+
+              {onNext && (
+                <motion.button
+                  className={styles.nextButton}
+                  onClick={onNext}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span>SEGUINTE</span>
+                  <ArrowRight size={20} weight="bold" />
+                </motion.button>
+              )}
             </div>
 
             <motion.button 

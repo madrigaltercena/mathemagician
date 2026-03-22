@@ -30,15 +30,25 @@ const DIFFICULTIES = [
 export default function FreePlay() {
   const navigate = useNavigate();
   useGame();
-  const [selectedOperation, setSelectedOperation] = useState('addition');
+  const [selectedOperations, setSelectedOperations] = useState([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState('easy');
 
   const isOperationUnlocked = (op) => {
     return op.unlockCondition();
   };
 
+  const handleOperationToggle = (opId) => {
+    setSelectedOperations(prev =>
+      prev.includes(opId)
+        ? prev.filter(id => id !== opId)
+        : [...prev, opId]
+    );
+  };
+
   const handleStartChallenge = () => {
-    navigate(`/challenge/${selectedOperation}?mode=freeplay`);
+    if (selectedOperations.length === 0) return;
+    const opsParam = selectedOperations.join(',');
+    navigate(`/challenge/free?mode=freeplay&ops=${opsParam}`);
   };
 
   const handleBack = () => {
@@ -65,19 +75,20 @@ export default function FreePlay() {
           {OPERATIONS.map((op) => {
             const Icon = op.icon;
             const unlocked = isOperationUnlocked(op);
+            const isSelected = selectedOperations.includes(op.id);
             return (
               <motion.button
                 key={op.id}
-                className={`${styles.operationCard} ${selectedOperation === op.id ? styles.selected : ''} ${!unlocked ? styles.locked : ''}`}
+                className={`${styles.operationCard} ${isSelected ? styles.selected : ''} ${!unlocked ? styles.locked : ''}`}
                 style={{ '--op-color': op.color }}
-                onClick={() => unlocked && setSelectedOperation(op.id)}
+                onClick={() => unlocked && handleOperationToggle(op.id)}
                 whileHover={unlocked ? { scale: 1.02 } : {}}
                 whileTap={unlocked ? { scale: 0.98 } : {}}
               >
                 <Icon size={40} weight="fill" className={styles.operationIcon} />
                 <span className={styles.operationLabel}>{op.label}</span>
                 <span className={styles.operationStatus}>
-                  {unlocked ? '✅' : '🔒'}
+                  {unlocked ? '' : '🔒'}
                 </span>
               </motion.button>
             );
@@ -107,8 +118,9 @@ export default function FreePlay() {
       <motion.button
         className={styles.startButton}
         onClick={handleStartChallenge}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        disabled={selectedOperations.length === 0}
+        whileHover={selectedOperations.length > 0 ? { scale: 1.02 } : {}}
+        whileTap={selectedOperations.length > 0 ? { scale: 0.98 } : {}}
       >
         <Lightning size={24} weight="fill" />
         <span>COMEÇAR DESAFIO!</span>

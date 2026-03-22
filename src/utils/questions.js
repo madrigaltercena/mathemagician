@@ -99,11 +99,44 @@ function makeExpr(lvl) {
 }
 
 // ─── Main generator ──────────────────────────────────────────
+// opsArray: array of operation ids for freeplay, e.g. ['addition', 'multiplication']
+// level: difficulty level (1-16)
+// count: number of questions (default 5, freeplay uses 10)
+// When opsArray is provided, generates questions mixing those operations with progressive difficulty
+export function generateQuestions(kingdom, level, count = 5, opsArray = null) {
+  // Freeplay mode: mix operations with progressive difficulty
+  if (opsArray && Array.isArray(opsArray) && opsArray.length > 0) {
+    const questions = [];
+    for (let i = 0; i < count; i++) {
+      // Progressive difficulty: earlier questions easier, later harder
+      // Map i (0 to count-1) to a pseudo-level: 1-10 for first 5, 5-10 for last 5
+      let qLevel;
+      if (count === 10) {
+        if (i < 4) {
+          qLevel = 1 + Math.floor(i / 2); // levels 1-2
+        } else if (i < 7) {
+          qLevel = 3 + (i - 4); // levels 3-5
+        } else {
+          qLevel = 6 + Math.min(i - 7, 2); // levels 6-8
+        }
+      } else {
+        qLevel = level;
+      }
+      const op = opsArray[i % opsArray.length]; // cycle through selected ops
+      let q;
+      if (op === 'multiplication') q = makeMul(qLevel);
+      else if (op === 'division') q = makeDiv(qLevel);
+      else if (op === 'expression') q = makeExpr(qLevel);
+      else if (op === 'subtraction') q = makeSub(qLevel);
+      else q = makeAdd(qLevel);
+      questions.push(q);
+    }
+    return questions;
+  }
 
-export function generateQuestions(kingdom, level, count = 5, operationOverride = null) {
+  // Story mode: original behavior
   const cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG[1];
-  // Use override operation if provided (freeplay mode), otherwise fall back to level config
-  const ops = operationOverride ? [operationOverride] : (cfg.ops || ['addition']);
+  const ops = cfg.ops || ['addition'];
   const questions = [];
   for (let i = 0; i < count; i++) {
     const op = ops[rand(0, ops.length - 1)];
