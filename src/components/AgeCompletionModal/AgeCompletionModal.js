@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Star, ArrowRight, House } from '@phosphor-icons/react';
 import styles from './AgeCompletionModal.module.css';
@@ -63,7 +64,7 @@ export default function AgeCompletionModal({ isOpen, level, streak = 0, onContin
                 </motion.button>
               )}
 
-              <motion.button className={styles.homeButton} onClick={onHome}
+              <motion.button className={styles.homeButton} onClick={() => navigate('/')}
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <House size={20} weight="fill" />
                 <span>Menu Principal</span>

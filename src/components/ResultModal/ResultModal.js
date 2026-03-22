@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { House, ArrowClockwise, ArrowRight } from '@phosphor-icons/react';
 import styles from './ResultModal.module.css';
@@ -15,6 +16,7 @@ export default function ResultModal({
   onRetry,
   onHome 
 }) {
+  const navigate = useNavigate();
   const percentage = Math.round((correct / total) * 100);
   const stars = percentage >= 100 ? 3 : percentage >= 80 ? 2 : percentage >= 60 ? 1 : 0;
   
@@ -110,7 +112,7 @@ export default function ResultModal({
 
             <motion.button 
               className={styles.homeButton}
-              onClick={onHome}
+              onClick={onHome ? () => navigate('/') : undefined}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

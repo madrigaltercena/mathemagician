@@ -24,8 +24,8 @@ const initialSettings = {
 
 const initialProgress = {
   story: {
-    kingdomsUnlocked: ['addition'],
-    currentKingdom: 'addition',
+    kingdomsUnlocked: ['kingdom1'],
+    currentKingdom: 'kingdom1',
     currentLevel: 1,
     completedLevels: {},
   },
@@ -224,27 +224,26 @@ export function GameProvider({ children }) {
     resetGame: () => dispatch({ type: ACTIONS.RESET_GAME }),
     resetProgress: () => dispatch({ type: ACTIONS.RESET_PROGRESS }),
     
-    // Update streak
+    // Update streak — use ref to always read latest player state without closure staleness
     updateStreak: () => {
       const today = new Date().toISOString().split('T')[0];
-      const lastPlayed = state.player.lastPlayedDate;
-      
-      if (!lastPlayed) {
-        dispatch({ type: ACTIONS.UPDATE_PLAYER, payload: { currentStreak: 1, lastPlayedDate: today } });
-        return;
-      }
-
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-      if (lastPlayed === today) {
-        return; // Already played today
-      } else if (lastPlayed === yesterdayStr) {
-        dispatch({ type: ACTIONS.UPDATE_PLAYER, payload: { currentStreak: state.player.currentStreak + 1, lastPlayedDate: today } });
-      } else {
-        dispatch({ type: ACTIONS.UPDATE_PLAYER, payload: { currentStreak: 1, lastPlayedDate: today } });
-      }
+      // Read current player state at call time via getState() inside dispatch to avoid stale closure
+      dispatch((currentState) => {
+        const { lastPlayedDate, currentStreak } = currentState.player;
+        if (!lastPlayedDate) {
+          return { type: ACTIONS.UPDATE_PLAYER, payload: { currentStreak: 1, lastPlayedDate: today } };
+        }
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        if (lastPlayedDate === today) {
+          return null; // Already played today, no-op
+        } else if (lastPlayedDate === yesterdayStr) {
+          return { type: ACTIONS.UPDATE_PLAYER, payload: { currentStreak: currentStreak + 1, lastPlayedDate: today } };
+        } else {
+          return { type: ACTIONS.UPDATE_PLAYER, payload: { currentStreak: 1, lastPlayedDate: today } };
+        }
+      });
     },
 
     // Complete a level
@@ -271,9 +270,10 @@ export function GameProvider({ children }) {
       }
       
       // Advance kingdom based on level thresholds (8 kingdoms)
+      // NOTE: KINGDOM_ORDER and KINGDOM_THRESHOLDS must stay in sync with Challenge.js
       const KINGDOM_ORDER = ['kingdom1', 'kingdom2', 'kingdom3', 'kingdom4', 'kingdom5', 'kingdom6', 'kingdom7', 'kingdom8'];
       const KINGDOM_THRESHOLDS = [1, 3, 5, 7, 9, 11, 13, 15];
-      
+
       let nextKingdom = kingdom;
       for (let i = KINGDOM_ORDER.length - 1; i >= 0; i--) {
         if (level >= KINGDOM_THRESHOLDS[i]) {
