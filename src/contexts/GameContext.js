@@ -271,14 +271,14 @@ export function GameProvider({ children }) {
       
       // Advance kingdom based on level thresholds (8 kingdoms)
       // NOTE: KINGDOM_ORDER and KINGDOM_THRESHOLDS must stay in sync with Challenge.js
-      // Thresholds use > comparison: level > threshold → next kingdom
-      // level 1-2 → kingdom1 (threshold 0), level 3-4 → kingdom2 (threshold 2), etc.
+      // Thresholds use > comparison: nextKingdom is derived from the NEW currentLevel, not the completed level
       const KINGDOM_ORDER = ['kingdom1', 'kingdom2', 'kingdom3', 'kingdom4', 'kingdom5', 'kingdom6', 'kingdom7', 'kingdom8'];
       const KINGDOM_THRESHOLDS = [0, 2, 4, 6, 8, 10, 12, 14];
 
-      let nextKingdom = kingdom;
+      // Derive kingdom from the NEW currentLevel (already incremented), not the completed level
+      let nextKingdom = storyProgress.currentKingdom;
       for (let i = KINGDOM_ORDER.length - 1; i >= 0; i--) {
-        if (level > KINGDOM_THRESHOLDS[i]) {
+        if (storyProgress.currentLevel > KINGDOM_THRESHOLDS[i]) {
           nextKingdom = KINGDOM_ORDER[i];
           break;
         }
