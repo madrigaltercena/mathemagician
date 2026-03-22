@@ -11,7 +11,7 @@
  * The threshold logic in Challenge.js and GameContext.js (commits 99231d5
  * and 933ea56) must remain untouched.
  */
-import { useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 const STORAGE_KEY = 'madrigal_challenge_progress';
 const TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -70,21 +70,23 @@ export function saveChallengeProgress({ kingdom, level, questionIndex, questions
  * Hook: useChallengeProgress(kingdom, level, isStory, isReview)
  *
  * Returns:
- *   savedProgress   — object from localStorage or null
+ *   savedProgress   — object from localStorage or null (only on first mount)
  *   saveProgress()  — call after each answer to persist state
  *   clearProgress() — call on level complete or retry
  */
 export function useChallengeProgress(kingdom, level, isStory, isReview) {
-  const isFirstRun = useRef(true);
-  const savedProgress = useRef(null);
+  // Load synchronously on first render (initializer) so savedProgress is
+  // available immediately — no need to wait for a useEffect to run first.
+  const [savedProgress, setSavedProgress] = useState(() =>
+    !isStory || isReview ? null : loadChallengeProgress(kingdom, level)
+  );
 
-  // On mount / kingdom+level change: load from localStorage
   useEffect(() => {
     if (!isStory || isReview) {
-      savedProgress.current = null;
+      setSavedProgress(null);
       return;
     }
-    savedProgress.current = loadChallengeProgress(kingdom, level);
+    setSavedProgress(loadChallengeProgress(kingdom, level));
   }, [kingdom, level, isStory, isReview]);
 
   const saveProgress = (data) => {
@@ -97,9 +99,5 @@ export function useChallengeProgress(kingdom, level, isStory, isReview) {
     clearChallengeProgress();
   };
 
-  return {
-    savedProgress: isFirstRun.current ? savedProgress.current : null,
-    saveProgress,
-    clearProgress,
-  };
+  return { savedProgress, saveProgress, clearProgress };
 }

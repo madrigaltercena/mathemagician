@@ -313,8 +313,10 @@ export default function Challenge({ onBack, onComplete }) {
   };
 
   const handleNext = () => {
-    // BUG #2 FIX: derive kingdom from next level using thresholds, not from state (which may be stale)
-    const nextLevel = state.progress.story.currentLevel;
+    // BUG #2 FIX: derive from lastCompletedLevel (captured at finish time), not from
+    // state which may be stale if React hasn't re-rendered after completeLevel dispatch.
+    // nextLevel is the level the user just finished + 1.
+    const nextLevel = (lastCompletedLevel || state.progress.story.currentLevel) + 1;
     const nextKingdom = getKingdomForLevel(nextLevel);
     setQuestions(generateQuestions(nextKingdom, nextLevel, 5, null));
     setCurrentIndex(0);
